@@ -21,7 +21,7 @@ This project implements an advanced trading bot using Python. The bot connects t
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/yourusername/advanced-trading-bot.git
+   git clone https://github.com/georgetoloraia/AutoBC.git
    cd advanced-trading-bot
    ```
 
