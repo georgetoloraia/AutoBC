@@ -1,13 +1,17 @@
-API_KEY = 'Your Binance API KEY'
-SECRET = 'Your Binance SECRET'
+import os
+from dotenv import load_dotenv
 
-TELEGRAM_TOKEN = 'Telegram Token'
-TELEGRAM_CHAT_ID = 'Telegram Chat ID'
+# Load environment variables from .env file
+load_dotenv()
 
-# Parameters
+API_KEY = os.getenv('API_KEY')
+SECRET = os.getenv('SECRET')
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+
 quote_currency = 'USDT'
-initial_investment = 5.0  # USD
+initial_investment = 5.0  # Modifi if need
 rsi_period = 14  # User's RSI period
-commission_rate = 0.001  # 0.1%
-stop_loss_percentage = 0.05  # 5% stop loss
-take_profit_percentage = 0.1  # 10% take profit
+commission_rate = 0.001  # 0.1% | Modifi if need
+stop_loss_percentage = 0.05  # 5% stop loss | Modifi if need
+take_profit_percentage = 0.1  # 10% take profit | Modifi if need
