@@ -113,7 +113,7 @@ The bot uses the following technical indicators:
 - **Please fork the repository and submit a pull request with your changes.**
 
 
-```yaml
+```env
 
 ## Contact
 
