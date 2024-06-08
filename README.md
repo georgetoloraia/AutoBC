@@ -114,11 +114,12 @@ The bot uses the following technical indicators:
 
 
 ```env
-
 ## Contact
 
-For any inquiries or issues, please contact [georgetoloraia@gmail.com].
-For Discord Server see this invitation [https://discord.gg/F6DuQYXA]
+For any inquiries or issues, please contact = georgetoloraia@gmail.com
+For Discord Server see this invitation = https://discord.gg/F6DuQYXA
+```
+
 
 ---
 
