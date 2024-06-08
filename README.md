@@ -22,7 +22,7 @@ This project implements an advanced trading bot using Python. The bot connects t
 1. **Clone the repository:**
    ```sh
    git clone https://github.com/georgetoloraia/AutoBC.git
-   cd advanced-trading-bot
+   cd AutoBC
    ```
 
 2. **Create and activate a virtual environment:**
@@ -39,3 +39,16 @@ This project implements an advanced trading bot using Python. The bot connects t
     .venv/bin/activate
     ```
 
+3. **Install the required Python packages:**
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+4. **Set up your environment variables:**
+    - Create a `.env` file in the root directory of the project and add the following:
+    ```env
+    API_KEY=your_binance_api_key
+    SECRET=your_binance_secret
+    TELEGRAM_TOKEN=your_telegram_bot_token
+    TELEGRAM_CHAT_ID=your_telegram_chat_id
+    ```
