@@ -27,32 +27,6 @@ AutoBC/
     └── telegram_bot.py    # Module for sending notifications to Telegram
 ```
 
-## Project Structure
-
-    ```arduino
-    AutoBC/
-    ├── bot.py
-    ├── config/
-    │   └── settings.py
-    ├── indicators/
-    │   └── technical_indicators.py
-    ├── trading/
-    │   ├── strategy.py
-    │   └── trader.py
-    └── notifications/
-        └── telegram_bot.py
-    
-    ```
-
-
-- **`bot.py`**: Main script to run the trading bot.
-- **`config/settings.py`**: Configuration file for storing API keys and trading parameters.
-- **`indicators/technical_indicators.py`**: Module for calculating technical indicators.
-- **`trading/strategy.py`**: Module for evaluating trading signals.
-- **`trading/trader.py`**: Main trading logic, including order execution and monitoring.
-- **`notifications/telegram_bot.py`**: Module for sending notifications to Telegram.
-
-
 **Technical Indicators**
 
 The bot uses the following technical indicators:
