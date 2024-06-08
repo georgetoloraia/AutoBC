@@ -115,10 +115,10 @@ The bot uses the following technical indicators:
 For Discord Server see this invitation [https://discord.gg/F6DuQYXA]
 
 ```env
-
 ## Contact
 
 For any inquiries or issues, please contact [georgetoloraia@gmail.com].
+For Discord Server see this invitation [https://discord.gg/F6DuQYXA]
 
 ---
 
