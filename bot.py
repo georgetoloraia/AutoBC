@@ -3,7 +3,7 @@ import asyncio
 import logging
 import pandas as pd
 import talib
-from config import settings
+from config import settings, quote_currency, initial_investment, rsi_period, commission_rate, stop_loss_percentage, take_profit_percentage
 from telegram import Bot
 from telegram.error import TelegramError
 
@@ -26,17 +26,9 @@ exchange = ccxt.binance({
 })
 
 # Initialize Telegram bot
-telegram_token = settings.TELEGRAM_TOKEN  # Your Telegram bot token
-chat_id = settings.TELEGRAM_CHAT_ID  # Your chat ID
+telegram_token = settings.TELEGRAM_TOKEN
+chat_id = settings.TELEGRAM_CHAT_ID
 bot = Bot(token=telegram_token)
-
-# Parameters
-quote_currency = 'USDT'
-initial_investment = 5.0  # USD
-rsi_period = 14  # User's RSI period
-commission_rate = 0.001  # 0.1%
-stop_loss_percentage = 0.05  # 5% stop loss
-take_profit_percentage = 0.1  # 10% take profit
 
 # Function to send Telegram notifications
 async def send_telegram_message(message):
