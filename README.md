@@ -11,6 +11,45 @@ This project implements an advanced trading bot using Python. The bot connects t
 - Implements stop-loss and take-profit mechanisms
 - Sends trade notifications to Telegram
 
+## Project Structure
+    ```arduino
+    AutoBC/
+    ├── bot.py
+    ├── config/
+    │   └── settings.py
+    ├── indicators/
+    │   └── technical_indicators.py
+    ├── trading/
+    │   ├── strategy.py
+    │   └── trader.py
+    └── notifications/
+        └── telegram_bot.py
+    ```
+
+    - `bot.py`: Main script to run the trading bot.
+    - `config/settings.py`: Configuration file for storing API keys and trading parameters.
+    - `indicators/technical_indicators.py`: Module for calculating technical indicators.
+    - `trading/strategy.py`: Module for evaluating trading signals.
+    - `trading/trader.py`: Main trading logic, including order execution and monitoring.
+    - `notifications/telegram_bot.py`: Module for sending notifications to Telegram.
+
+    **Technical Indicators**
+
+    The bot uses the following technical indicators:
+
+    - Exponential Moving Average (EMA)
+    - Weighted Moving Average (WMA)
+    - Bollinger Bands
+    - TRIX
+    - Relative Strength Index (RSI)
+    - Moving Average Convergence Divergence (MACD)
+    - Average True Range (ATR)
+    - Stochastic Oscillator (STOCH)
+    - Commodity Channel Index (CCI)
+    - On-Balance Volume (OBV)
+
+
+
 ## Requirements
 
 - Python 3.7+
@@ -52,3 +91,42 @@ This project implements an advanced trading bot using Python. The bot connects t
     TELEGRAM_TOKEN=your_telegram_bot_token
     TELEGRAM_CHAT_ID=your_telegram_chat_id
     ```
+
+## Usage
+
+1. **Activate the virtual environment:**
+    ```sh
+    source venv/bin/activate  # On Windows use .\venv\Scripts\activate
+    ```
+
+2. **Run the bot:**
+    ```sh
+    python bot.py
+    ```
+
+3. **Deactivate the virtual environment when done:**
+    ```sh
+    deactivate
+    ```
+
+## Logging
+
+**The bot logs its activity to results.txt in the root directory. The log includes information about fetched data, evaluated signals, placed orders, and any errors encountered.**
+
+## Contributing
+
+- **Contributions are welcome!**
+- **Please fork the repository and submit a pull request with your changes.**
+
+
+```yaml
+
+## Contact
+
+For any inquiries or issues, please contact [georgetoloraia@gmail.com].
+For Discord Server see this invitation [https://discord.gg/F6DuQYXA]
+
+---
+
+By following these steps, you will be able to set up and run your advanced trading bot efficiently. If you have any questions or need further assistance, feel free to reach out. Happy trading!
+```
