@@ -64,13 +64,17 @@ async def fetch_order_book(pair, limit=None, params={}):
         return None
 
 def analyze_order_book(order_book):
-    bids = order_book['bids']
-    asks = order_book['asks']
+    bids = order_book.get('bids', [])
+    asks = order_book.get('asks', [])
+    
+    if not bids or not asks:
+        logger.info("Order book is empty.")
+        return 0, 0, 0
     
     total_bid_volume = sum([bid[1] for bid in bids])
     total_ask_volume = sum([ask[1] for ask in asks])
     
-    bid_ask_spread = asks[0][0] - bids[0][0]
+    bid_ask_spread = asks[0][0] - bids[0][0] if bids and asks else 0
     
     logger.info(f"Total Bid Volume: {total_bid_volume}")
     logger.info(f"Total Ask Volume: {total_ask_volume}")
@@ -89,6 +93,10 @@ async def fetch_recent_trades(pair, limit=100):
 def analyze_recent_trades(trades):
     buy_volume = 0
     sell_volume = 0
+    
+    if not trades:
+        logger.info("Recent trades list is empty.")
+        return buy_volume, sell_volume
     
     for trade in trades:
         if trade['side'] == 'buy':
@@ -112,6 +120,13 @@ def determine_final_signal(order_book, trades, historical_prices):
         final_action = 'sell'
     else:
         final_action = None
+
+    logger.info(f"================== \ntotal_bid_volume: {total_bid_volume}\n\
+                total_ask_volume: {total_ask_volume}\n\
+                    buy_volume: {buy_volume}\n\
+                        sell_volume: {sell_volume}\n\
+                            historical_prices_signal: {historical_prices_signal}\n\
+                                ====================================")
     
     if total_bid_volume > total_ask_volume and buy_volume > sell_volume and final_action == 'buy':
         return 'buy'
@@ -201,13 +216,19 @@ async def advanced_trade():
                 if final_action:
                     usdt_balance = await get_balance('USDT')
                     if final_action == 'buy' and usdt_balance > settings.initial_investment:
-                        amount_to_buy = (usdt_balance * (1 - settings.commission_rate)) / order_book['asks'][0][0]
+                        amount_to_buy = (usdt_balance * (1 - settings.commission_rate)) / order_book['asks'][0][0] if order_book['asks'] else 0
+                        if amount_to_buy <= 0:
+                            logger.error("Calculated amount to buy is zero or negative.")
+                            continue
                         buy_order = await place_market_order(pair, 'buy', amount_to_buy)
                         if buy_order:
                             buy_price = await get_current_price(pair)
                             # Monitor position for stop-loss or take-profit
                             while True:
                                 current_price = await get_current_price(pair)
+                                if current_price is None:
+                                    logger.error("Failed to fetch current price during monitoring.")
+                                    break
                                 if current_price <= buy_price * (1 - settings.stop_loss_percentage):
                                     logger.info(f"Stop-loss triggered for {pair} at {current_price}")
                                     await place_market_order(pair, 'sell', amount_to_buy)

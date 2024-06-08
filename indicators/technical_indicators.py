@@ -11,4 +11,9 @@ def calculate_indicators(df):
     df['slowk'], df['slowd'] = talib.STOCH(df['high'], df['low'], df['close'], fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
     df['cci'] = talib.CCI(df['high'], df['low'], df['close'], timeperiod=14)
     df['obv'] = talib.OBV(df['close'], df['volume'])
+    df['%K'], df['%D'] = talib.STOCH(df['high'], df['low'], df['close'])
+    df['adx'] = talib.ADX(df['high'], df['low'], df['close'])
+    df['+DI'] = talib.PLUS_DI(df['high'], df['low'], df['close'])
+    df['-DI'] = talib.MINUS_DI(df['high'], df['low'], df['close'])
+    df['vwap'] = (df['close'] * df['volume']).cumsum() / df['volume'].cumsum()
     return df

@@ -13,20 +13,20 @@ def simplified_evaluate_trading_signals(data):
         latest = df.iloc[-1]
         df = calculate_indicators(df)
 
-        # Simplified Buy conditions
+        # Buy conditions
         buy_conditions = [
-            latest['close'] > latest['ema'],  # Price above EMA
-            latest['trix'] > 0,  # TRIX positive
-            latest['rsi'] < 40,  # RSI below 40 (less strict oversold condition)
-            latest['macd'] > latest['macd_signal']  # MACD above signal line
+            latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
+            latest['%K'] < 20 and latest['%K'] > latest['%D'],  # Stochastic %K < 20 and %K > %D
+            latest['+DI'] > latest['-DI'] and latest['adx'] > 20,  # ADX conditions
+            latest['close'] > latest['vwap']  # Price above VWAP
         ]
 
-        # Simplified Sell conditions
+        # Sell conditions
         sell_conditions = [
-            latest['close'] < latest['ema'],  # Price below EMA
-            latest['trix'] < 0,  # TRIX negative
-            latest['rsi'] > 60,  # RSI above 60 (less strict overbought condition)
-            latest['macd'] < latest['macd_signal']  # MACD below signal line
+            latest['close'] > latest['upper_band'],  # Price above upper Bollinger Band
+            latest['%K'] > 80 and latest['%K'] < latest['%D'],  # Stochastic %K > 80 and %K < %D
+            latest['-DI'] > latest['+DI'] and latest['adx'] > 20,  # ADX conditions
+            latest['close'] < latest['vwap']  # Price below VWAP
         ]
 
         if all(buy_conditions):
