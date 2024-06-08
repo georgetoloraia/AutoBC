@@ -23,3 +23,19 @@ This project implements an advanced trading bot using Python. The bot connects t
    ```sh
    git clone https://github.com/yourusername/advanced-trading-bot.git
    cd advanced-trading-bot
+   ```
+
+2. **Create and activate a virtual environment:**
+    - On Linux/Mac
+
+    ```sh
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+
+    - On Windows
+    ```sh
+    python -m venv venv
+    .venv/bin/activate
+    ```
+
