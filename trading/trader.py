@@ -7,6 +7,9 @@ from trading.strategy import simplified_evaluate_trading_signals
 from notifications.telegram_bot import send_telegram_message
 from indicators.technical_indicators import calculate_indicators
 
+import json
+
+
 logger = logging.getLogger(__name__)
 
 # Initialize Binance exchange connection
@@ -76,9 +79,9 @@ def analyze_order_book(order_book):
     
     bid_ask_spread = asks[0][0] - bids[0][0] if bids and asks else 0
     
-    logger.info(f"Total Bid Volume: {total_bid_volume}")
-    logger.info(f"Total Ask Volume: {total_ask_volume}")
-    logger.info(f"Bid-Ask Spread: {bid_ask_spread}")
+    # logger.info(f"Total Bid Volume: {total_bid_volume}")
+    # logger.info(f"Total Ask Volume: {total_ask_volume}")
+    # logger.info(f"Bid-Ask Spread: {bid_ask_spread}")
     
     return total_bid_volume, total_ask_volume, bid_ask_spread
 
@@ -110,9 +113,24 @@ def analyze_recent_trades(trades):
     return buy_volume, sell_volume
 
 def determine_final_signal(order_book, trades, historical_prices):
-    total_bid_volume, total_ask_volume, bid_ask_spread = analyze_order_book(order_book)
-    buy_volume, sell_volume = analyze_recent_trades(trades)
-    historical_prices_signal = simplified_evaluate_trading_signals(historical_prices)
+    try:
+        total_bid_volume, total_ask_volume, bid_ask_spread = analyze_order_book(order_book)
+    except Exception as e:
+        logger.error(f"Error analyzing order book: {e}")
+        total_bid_volume, total_ask_volume, bid_ask_spread = 0, 0, 0
+
+    try:
+        buy_volume, sell_volume = analyze_recent_trades(trades)
+    except Exception as e:
+        logger.error(f"Error analyzing recent trades: {e}")
+        buy_volume, sell_volume = 0, 0
+
+    try:
+        historical_prices_signal = simplified_evaluate_trading_signals(historical_prices)
+    except Exception as e:
+        logger.error(f"Error evaluating historical prices: {e}")
+        historical_prices_signal = {}
+
     # Determine the final signal based on all timeframes
     if 'buy' in historical_prices_signal.values():
         final_action = 'buy'
@@ -121,19 +139,21 @@ def determine_final_signal(order_book, trades, historical_prices):
     else:
         final_action = None
 
-    logger.info(f"================== \ntotal_bid_volume: {total_bid_volume}\n\
-                total_ask_volume: {total_ask_volume}\n\
-                    buy_volume: {buy_volume}\n\
-                        sell_volume: {sell_volume}\n\
-                            historical_prices_signal: {historical_prices_signal}\n\
-                                ====================================")
-    
+    logger.info(f"Order Book - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
+    logger.info(f"Recent Trades - Buy Volume: {buy_volume}, Sell Volume: {sell_volume}")
+    logger.info(f"Historical Prices Signal: {historical_prices_signal}")
+    logger.info(f"Final Action before confirmation: {final_action}")
+
     if total_bid_volume > total_ask_volume and buy_volume > sell_volume and final_action == 'buy':
+        logger.info("Final decision: BUY")
         return 'buy'
     elif total_ask_volume > total_bid_volume and sell_volume > buy_volume and final_action == 'sell':
+        logger.info("Final decision: SELL")
         return 'sell'
     else:
+        logger.info("Final decision: NONE")
         return None
+
 
 async def get_balance(currency):
     try:
