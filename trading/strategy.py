@@ -15,24 +15,24 @@ def simplified_evaluate_trading_signals(data):
 
         # Buy conditions
         buy_conditions = [
-            latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
-            latest['%K'] < 25 and latest['%K'] > latest['%D'],  # Stochastic %K < 20 and %K > %D
-            latest['+DI'] > latest['-DI'] and latest['adx'] > 20,  # ADX conditions
-            latest['close'] > latest['vwap'],  # Price above VWAP
+            # latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
+            # latest['%K'] < 25 and latest['%K'] > latest['%D'],  # Stochastic %K < 20 and %K > %D
+            # latest['+DI'] > latest['-DI'] and latest['adx'] > 20,  # ADX conditions
+            # latest['close'] > latest['vwap'],  # Price above VWAP
             latest['rsi'] < 35,  # RSI below 30
-            latest['macd'] > latest['macd_signal'],  # MACD bullish crossover
-            latest['obv'] > df['obv'].iloc[-2]  # Increasing OBV
+            # latest['macd'] > latest['macd_signal'],  # MACD bullish crossover
+            # latest['obv'] > df['obv'].iloc[-2]  # Increasing OBV
         ]
 
         # Sell conditions
         sell_conditions = [
-            latest['close'] > latest['upper_band'],  # Price above upper Bollinger Band
-            latest['%K'] > 80 and latest['%K'] < latest['%D'],  # Stochastic %K > 80 and %K < %D
-            latest['-DI'] > latest['+DI'] and latest['adx'] > 20,  # ADX conditions
-            latest['close'] < latest['vwap'],  # Price below VWAP
+            # latest['close'] > latest['upper_band'],  # Price above upper Bollinger Band
+            # latest['%K'] > 80 and latest['%K'] < latest['%D'],  # Stochastic %K > 80 and %K < %D
+            # latest['-DI'] > latest['+DI'] and latest['adx'] > 20,  # ADX conditions
+            # latest['close'] < latest['vwap'],  # Price below VWAP
             latest['rsi'] > 70,  # RSI above 70
-            latest['macd'] < latest['macd_signal'],  # MACD bearish crossover
-            latest['obv'] < df['obv'].iloc[-2]  # Decreasing OBV
+            # latest['macd'] < latest['macd_signal'],  # MACD bearish crossover
+            # latest['obv'] < df['obv'].iloc[-2]  # Decreasing OBV
         ]
 
         if all(buy_conditions):

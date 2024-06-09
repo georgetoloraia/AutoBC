@@ -139,19 +139,35 @@ def determine_final_signal(order_book, trades, historical_prices):
     else:
         final_action = None
 
-    logger.info(f"Order Book - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
-    logger.info(f"Recent Trades - Buy Volume: {buy_volume}, Sell Volume: {sell_volume}")
-    logger.info(f"Historical Prices Signal: {historical_prices_signal}")
-    logger.info(f"Final Action before confirmation: {final_action}")
+    # logger.info(f"Order Book - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
+    # logger.info(f"Recent Trades - Buy Volume: {buy_volume}, Sell Volume: {sell_volume}")
+    # logger.info(f"Historical Prices Signal: {historical_prices_signal}")
+    # logger.info(f"Final Action before confirmation: {final_action}")
 
-    if total_bid_volume > total_ask_volume and buy_volume > sell_volume and final_action == 'buy':
-        logger.info("Final decision: BUY")
+    # if total_bid_volume > total_ask_volume and buy_volume > sell_volume and final_action == 'buy':
+    #     logger.info("Final decision: BUY")
+    #     return 'buy'
+    # elif total_ask_volume > total_bid_volume and sell_volume > buy_volume and final_action == 'sell':
+    #     logger.info("Final decision: SELL")
+    #     return 'sell'
+    # else:
+    #     logger.info("Final decision: NONE")
+    #     return None
+
+    # Calculate the percentage of bid volume over total volume
+    bid_ratio = total_bid_volume / (total_bid_volume + total_ask_volume) if (total_bid_volume + total_ask_volume) > 0 else 0
+    # Calculate the percentage of buy volume over total trade volume
+    buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
+
+    # Check if more than 80% of the volume are bids and buys respectively
+    if bid_ratio > 0.8 and buy_ratio > 0.8 and final_action == 'buy':
+        logger.info("Final decision: BUY - bid and buy volumes are both above 80%")
         return 'buy'
-    elif total_ask_volume > total_bid_volume and sell_volume > buy_volume and final_action == 'sell':
-        logger.info("Final decision: SELL")
+    elif bid_ratio < 0.2 and buy_ratio < 0.2 and final_action == 'sell':
+        logger.info("Final decision: SELL - ask and sell volumes are both above 80%")
         return 'sell'
     else:
-        logger.info("Final decision: NONE")
+        logger.info("Final decision: NONE - conditions not met for either buy or sell")
         return None
 
 
