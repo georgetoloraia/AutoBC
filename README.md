@@ -1,3 +1,16 @@
+<h1 align="center" textcolor="red">Connect with me:</h1>
+<div align="center">
+  <a href="https://www.linkedin.com/in/george-toloraia/" target="_blank">
+    <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/linkedin/default.svg" width="52" height="40" alt="linkedin logo"  />
+  </a>
+  <a href="https://twitter.com/gtoloraia19" target="_blank">
+    <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/twitter/default.svg" width="52" height="40" alt="twitter logo"  />
+  </a>
+  <a href="https://discord.gg/SU659ZRz" target="_blank">
+    <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/discord/default.svg" width="52" height="40" alt="discord logo"  />
+  </a>
+<div/>
+
 # Advanced Trading Bot
 
 This project implements an advanced trading bot using Python. The bot connects to the Binance exchange, evaluates trading signals based on various technical indicators, and executes trades accordingly. It also sends notifications about trading actions and errors to a specified Telegram chat.
