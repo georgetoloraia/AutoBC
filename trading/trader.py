@@ -107,8 +107,8 @@ def analyze_recent_trades(trades):
         elif trade['side'] == 'sell':
             sell_volume += trade['amount']
     
-    logger.info(f"Buy Volume: {buy_volume}")
-    logger.info(f"Sell Volume: {sell_volume}")
+    # logger.info(f"Buy Volume: {buy_volume}")
+    # logger.info(f"Sell Volume: {sell_volume}")
     
     return buy_volume, sell_volume
 
@@ -158,6 +158,12 @@ def determine_final_signal(order_book, trades, historical_prices):
     bid_ratio = total_bid_volume / (total_bid_volume + total_ask_volume) if (total_bid_volume + total_ask_volume) > 0 else 0
     # Calculate the percentage of buy volume over total trade volume
     buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
+
+    logger.info(f"========\n\
+                bid_ratio: {bid_ratio}\n\
+                buy_ratio: {buy_ratio}\n\
+                final_action: {final_action}\n\
+                ==========")
 
     # Check if more than 80% of the volume are bids and buys respectively
     if bid_ratio > 0.8 and buy_ratio > 0.8 and final_action == 'buy':
