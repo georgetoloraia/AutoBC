@@ -166,7 +166,7 @@ def determine_final_signal(order_book, trades, historical_prices):
                 ==========")
 
     # Check if more than 80% of the volume are bids and buys respectively
-    if bid_ratio >= 0.6 and buy_ratio >= 0.65 and final_action == 'buy':
+    if bid_ratio >= 0.55 and buy_ratio >= 0.55 and final_action == 'buy':
         logger.info("Final decision: BUY - bid and buy volumes are both above 80%")
         return 'buy'
     elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell':
