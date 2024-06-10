@@ -20,7 +20,7 @@ def simplified_evaluate_trading_signals(data):
             # latest['+DI'] > latest['-DI'] and latest['adx'] > 20,  # ADX conditions
             # latest['close'] > latest['vwap'],  # Price above VWAP
             latest['rsi'] < 35,  # RSI below 30
-            # latest['macd'] > latest['macd_signal'],  # MACD bullish crossover
+            latest['macd'] > latest['macd_signal'],  # MACD bullish crossover
             # latest['obv'] > df['obv'].iloc[-2]  # Increasing OBV
         ]
 
@@ -31,7 +31,7 @@ def simplified_evaluate_trading_signals(data):
             # latest['-DI'] > latest['+DI'] and latest['adx'] > 20,  # ADX conditions
             # latest['close'] < latest['vwap'],  # Price below VWAP
             latest['rsi'] > 70,  # RSI above 70
-            # latest['macd'] < latest['macd_signal'],  # MACD bearish crossover
+            latest['macd'] < latest['macd_signal'],  # MACD bearish crossover
             # latest['obv'] < df['obv'].iloc[-2]  # Decreasing OBV
         ]
 
