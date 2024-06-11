@@ -13,5 +13,5 @@ quote_currency = 'USDT'
 initial_investment = 5.0  # investment amount | Modifi if need
 rsi_period = 14  # User's RSI period
 commission_rate = 0.001  # 0.1% | Modifi if need
-stop_loss_percentage = 0.05  # 5% stop loss | Modifi if need
-take_profit_percentage = 0.1  # 10% take profit | Modifi if need
+stop_loss_percentage = 0.015  # 5% stop loss | Modifi if need
+take_profit_percentage = 0.05  # 10% take profit | Modifi if need
