@@ -166,7 +166,7 @@ def determine_final_signal(order_book, trades, historical_prices):
                 ==========")
 
     # Check if more than 80% of the volume are bids and buys respectively
-    if bid_ratio >= 0.55 and buy_ratio >= 0.55 and final_action == 'buy':
+    if bid_ratio >= 0.7 and buy_ratio >= 0.7 and final_action == 'buy':
         logger.info("Final decision: BUY - bid and buy volumes are both above 80%")
         return 'buy'
     elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell':
@@ -201,6 +201,7 @@ async def place_market_order(pair, side, amount):
         return order
     except Exception as e:
         logger.error(f"An error occurred placing a {side} order for {pair}: {e}")
+        await send_telegram_message(f"An error occurred placing a {side} order for {pair}: {e}")
         return None
 
 async def convert_to_usdt(pair):
@@ -208,11 +209,23 @@ async def convert_to_usdt(pair):
         asset = pair.split('/')[0]
         asset_balance = await get_balance(asset)
         if asset_balance > 0:
-            order_result = await place_market_order(pair, 'sell', asset_balance)
-            if order_result:
-                logger.info(f"Converted {asset_balance} of {asset} to USDT")
-                await send_telegram_message(f"Converted {asset_balance} of {asset} to USDT.")
-                return order_result
+            # Check if the exchange supports direct conversion to USDT
+            conversion_pair = f"{asset}/USDT"
+            market = await exchange.fetch_ticker(conversion_pair)
+            if market:
+                order_result = await place_market_order(conversion_pair, 'sell', asset_balance)
+                if order_result:
+                    logger.info(f"Converted {asset_balance} of {asset} to USDT")
+                    await send_telegram_message(f"Converted {asset_balance} of {asset} to USDT.")
+                    return order_result
+            else:
+                logger.info(f"Direct conversion pair {conversion_pair} not available. Selling manually.")
+                # If direct conversion is not available, sell the asset first
+                order_result = await place_market_order(pair, 'sell', asset_balance)
+                if order_result:
+                    await send_telegram_message(f"Sold {asset_balance} of {asset} manually. Converting to USDT.")
+                    await asyncio.sleep(2)  # Allow some time for the market to update
+                    return await convert_to_usdt(pair)
         else:
             logger.info(f"No {asset} balance to convert to USDT")
     except Exception as e:
@@ -273,22 +286,22 @@ async def advanced_trade():
                                     break
                                 if current_price <= buy_price * (1 - settings.stop_loss_percentage):
                                     logger.info(f"Stop-loss triggered for {pair} at {current_price}")
-                                    await place_market_order(pair, 'sell', amount_to_buy)
+                                    await convert_to_usdt(pair)
                                     await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
                                     break
                                 elif current_price >= buy_price * (1 + settings.take_profit_percentage):
                                     logger.info(f"Take-profit triggered for {pair} at {current_price}")
-                                    await place_market_order(pair, 'sell', amount_to_buy)
+                                    await convert_to_usdt(pair)
                                     await send_telegram_message(f"Take-profit triggered for {pair} at {current_price}.")
                                     break
                                 await asyncio.sleep(60)  # Check every minute
-                    elif final_action == 'sell':
-                        asset = pair.split('/')[0]
-                        asset_balance = await get_balance(asset)
-                        if asset_balance > 0:
-                            await place_market_order(pair, 'sell', asset_balance)
-                            await convert_to_usdt(pair)
-                            await send_telegram_message(f"The {pair} : Converted in USDT.")
+                    # elif final_action == 'sell':
+                    #     asset = pair.split('/')[0]
+                    #     asset_balance = await get_balance(asset)
+                    #     if asset_balance > 0:
+                    #         await place_market_order(pair, 'sell', asset_balance)
+                    #         await convert_to_usdt(pair)
+                    #         await send_telegram_message(f"The {pair} : Converted in USDT.")
                 await asyncio.sleep(1)  # Short delay to prevent hitting rate limits
         except Exception as e:
             logger.error(f"An error occurred during trading: {e}")
