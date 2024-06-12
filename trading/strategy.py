@@ -15,30 +15,38 @@ def simplified_evaluate_trading_signals(data):
 
         # Buy conditions
         buy_conditions = [
-            # latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
-            # latest['%K'] < 25 and latest['%K'] > latest['%D'],  # Stochastic %K < 20 and %K > %D
-            # latest['+DI'] > latest['-DI'] and latest['adx'] > 20,  # ADX conditions
-            # latest['close'] > latest['vwap'],  # Price above VWAP
-            latest['rsi'] < 35,  # RSI below 30
+            latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
+            latest['rsi'] < 35,  # RSI below 35
             latest['macd'] > latest['macd_signal'],  # MACD bullish crossover
-            # latest['obv'] > df['obv'].iloc[-2]  # Increasing OBV
+            latest['adx'] > 25 and latest['+DI'] > latest['-DI'],  # ADX indicating strong trend
+            latest['close'] > latest['vwap'],  # Price above VWAP
+            latest['mfi'] < 20  # Money Flow Index indicating oversold
         ]
 
         # Sell conditions
         sell_conditions = [
-            # latest['close'] > latest['upper_band'],  # Price above upper Bollinger Band
-            # latest['%K'] > 80 and latest['%K'] < latest['%D'],  # Stochastic %K > 80 and %K < %D
-            # latest['-DI'] > latest['+DI'] and latest['adx'] > 20,  # ADX conditions
-            # latest['close'] < latest['vwap'],  # Price below VWAP
+            latest['close'] > latest['upper_band'],  # Price above upper Bollinger Band
             latest['rsi'] > 70,  # RSI above 70
             latest['macd'] < latest['macd_signal'],  # MACD bearish crossover
-            # latest['obv'] < df['obv'].iloc[-2]  # Decreasing OBV
+            latest['adx'] > 25 and latest['-DI'] > latest['+DI'],  # ADX indicating strong trend
+            latest['close'] < latest['vwap'],  # Price below VWAP
+            latest['mfi'] > 80  # Money Flow Index indicating overbought
         ]
 
-        if all(buy_conditions):
+        # Calculate confidence scores
+        buy_confidence = sum([1 if cond else 0 for cond in buy_conditions]) / len(buy_conditions)
+        sell_confidence = sum([1 if cond else 0 for cond in sell_conditions]) / len(sell_conditions)
+
+        logger.info(f"Buy confidence for {timeframe} timeframe: {buy_confidence}")
+        logger.info(f"Sell confidence for {timeframe} timeframe: {sell_confidence}")
+
+        if buy_confidence > 0.75:
             logger.info(f"Simplified Buy signal conditions met in {timeframe} timeframe.")
             signals[timeframe] = 'buy'
-        elif all(sell_conditions):
+        elif sell_confidence > 0.75:
             logger.info(f"Simplified Sell signal conditions met in {timeframe} timeframe.")
             signals[timeframe] = 'sell'
+        # else:
+        #     signals[timeframe] = 'hold'
+
     return signals

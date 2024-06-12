@@ -39,7 +39,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['3m', '5m', '15m'], limit=100):
+async def fetch_historical_prices(pair, timeframes=['3m', '5m',], limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
@@ -85,7 +85,7 @@ def analyze_order_book(order_book):
     
     return total_bid_volume, total_ask_volume, bid_ask_spread
 
-async def fetch_recent_trades(pair, limit=100):
+async def fetch_recent_trades(pair, limit=1000):
     try:
         trades = await exchange.fetch_trades(pair, limit=limit)
         return trades
@@ -155,21 +155,21 @@ def determine_final_signal(order_book, trades, historical_prices):
     #     return None
 
     # Calculate the percentage of bid volume over total volume
-    bid_ratio = total_bid_volume / (total_bid_volume + total_ask_volume) if (total_bid_volume + total_ask_volume) > 0 else 0
+    # bid_ratio = total_bid_volume / (total_bid_volume + total_ask_volume) if (total_bid_volume + total_ask_volume) > 0 else 0
     # Calculate the percentage of buy volume over total trade volume
     buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
 
-    logger.info(f"========\n\
-                bid_ratio: {bid_ratio}\n\
-                buy_ratio: {buy_ratio}\n\
-                final_action: {final_action}\n\
-                ==========")
+    # logger.info(f"========\n\
+    #             bid_ratio: {bid_ratio}\n\
+    #             buy_ratio: {buy_ratio}\n\
+    #             final_action: {final_action}\n\
+    #             ==========")
 
     # Check if more than 80% of the volume are bids and buys respectively
-    if bid_ratio >= 0.7 and buy_ratio >= 0.7 and final_action == 'buy':
+    if buy_ratio >= 0.7 and final_action == 'buy':
         logger.info("Final decision: BUY - bid and buy volumes are both above 80%")
         return 'buy'
-    elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell':
+    elif buy_ratio < 0.3 and final_action == 'sell':
         logger.info("Final decision: SELL - ask and sell volumes are both above 80%")
         return 'sell'
     else:
