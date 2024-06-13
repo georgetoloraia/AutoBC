@@ -38,7 +38,7 @@ def simplified_evaluate_trading_signals(data):
 
         logger.info(f"\n* * * * * * *\nbuy_condintions: {buy_conditions}\nbuy_confidence: {buy_confidence}\n* * * * * * * * * \n")
 
-        if all(buy_conditions):
+        if buy_confidence >= 55:
             logger.info(f"Simplified Buy signal conditions met in {timeframe} timeframe.")
             signals[timeframe] = ('buy', buy_confidence)
         elif all(sell_conditions):
