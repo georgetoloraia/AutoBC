@@ -9,7 +9,8 @@ from indicators.technical_indicators import calculate_indicators
 
 import json
 
-
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 # Initialize Binance exchange connection
@@ -39,7 +40,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['1m'], limit=1000):
+async def fetch_historical_prices(pair, timeframes=['5m', '15m', '1h'], limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
@@ -79,9 +80,7 @@ def analyze_order_book(order_book):
     
     bid_ask_spread = asks[0][0] - bids[0][0] if bids and asks else 0
     
-    # logger.info(f"Total Bid Volume: {total_bid_volume}")
-    # logger.info(f"Total Ask Volume: {total_ask_volume}")
-    # logger.info(f"Bid-Ask Spread: {bid_ask_spread}")
+    logger.info(f"Order Book Analysis - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
     
     return total_bid_volume, total_ask_volume, bid_ask_spread
 
@@ -107,8 +106,7 @@ def analyze_recent_trades(trades):
         elif trade['side'] == 'sell':
             sell_volume += trade['amount']
     
-    # logger.info(f"Buy Volume: {buy_volume}")
-    # logger.info(f"Sell Volume: {sell_volume}")
+    logger.info(f"Recent Trades Analysis - Buy Volume: {buy_volume}, Sell Volume: {sell_volume}")
     
     return buy_volume, sell_volume
 
@@ -132,49 +130,44 @@ def determine_final_signal(order_book, trades, historical_prices):
         historical_prices_signal = {}
 
     # Determine the final signal based on all timeframes
-    if 'buy' in historical_prices_signal.values():
-        final_action = 'buy'
-    elif 'sell' in historical_prices_signal.values():
-        final_action = 'sell'
-    else:
-        final_action = None
+    final_actions = []
+    confidence_scores = []
+    for timeframe, (action, confidence) in historical_prices_signal.items():
+        final_actions.append(action)
+        confidence_scores.append(confidence)
 
-    # logger.info(f"Order Book - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
-    # logger.info(f"Recent Trades - Buy Volume: {buy_volume}, Sell Volume: {sell_volume}")
-    # logger.info(f"Historical Prices Signal: {historical_prices_signal}")
-    # logger.info(f"Final Action before confirmation: {final_action}")
+    # Use the most frequent action as the final action
+    final_action = max(set(final_actions), key=final_actions.count) if final_actions else None
+    final_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0
 
-    # if total_bid_volume > total_ask_volume and buy_volume > sell_volume and final_action == 'buy':
-    #     logger.info("Final decision: BUY")
-    #     return 'buy'
-    # elif total_ask_volume > total_bid_volume and sell_volume > buy_volume and final_action == 'sell':
-    #     logger.info("Final decision: SELL")
-    #     return 'sell'
-    # else:
-    #     logger.info("Final decision: NONE")
-    #     return None
+    logger.info(f"Order Book - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
+    logger.info(f"Recent Trades - Buy Volume: {buy_volume}, Sell Volume: {sell_volume}")
+    logger.info(f"Historical Prices Signal: {historical_prices_signal}")
+    logger.info(f"Final Action before confirmation: {final_action}, Confidence: {final_confidence}")
 
     # Calculate the percentage of bid volume over total volume
-    # bid_ratio = total_bid_volume / (total_bid_volume + total_ask_volume) if (total_bid_volume + total_ask_volume) > 0 else 0
+    bid_ratio = total_bid_volume / (total_bid_volume + total_ask_volume) if (total_bid_volume + total_ask_volume) > 0 else 0
     # Calculate the percentage of buy volume over total trade volume
-    # buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
+    buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
 
-    # logger.info(f"========\n\
-    #             bid_ratio: {bid_ratio}\n\
-    #             buy_ratio: {buy_ratio}\n\
-    #             final_action: {final_action}\n\
-    #             ==========")
+    logger.info(f"========\n\
+                bid_ratio: {bid_ratio}\n\
+                buy_ratio: {buy_ratio}\n\
+                final_action: {final_action}\n\
+                ==========")
 
-    # Check if more than 80% of the volume are bids and buys respectively
-    if final_action == 'buy':
-        logger.info("Final decision: BUY - bid and buy volumes are both above 80%")
+    # Check if more than 55% of the volume are bids and buys respectively
+    if bid_ratio >= 0.5 and buy_ratio >= 0.5 and final_action == 'buy' and final_confidence > 0.5:
+        logger.info("Final decision: BUY - bid and buy volumes are both above 55%")
         return 'buy'
-    elif final_action == 'sell':
-        logger.info("Final decision: SELL - ask and sell volumes are both above 80%")
+    elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell' and final_confidence > 0.75:
+        logger.info("Final decision: SELL - ask and sell volumes are both above 70%")
         return 'sell'
     else:
         logger.info("Final decision: NONE - conditions not met for either buy or sell")
         return None
+
+
 
 
 async def get_balance(currency):
@@ -209,7 +202,6 @@ async def convert_to_usdt(pair):
         asset = pair.split('/')[0]
         asset_balance = await get_balance(asset)
         if asset_balance > 0:
-            # Check if the exchange supports direct conversion to USDT
             conversion_pair = f"{asset}/USDT"
             market = await exchange.fetch_ticker(conversion_pair)
             if market:
@@ -220,11 +212,10 @@ async def convert_to_usdt(pair):
                     return order_result
             else:
                 logger.info(f"Direct conversion pair {conversion_pair} not available. Selling manually.")
-                # If direct conversion is not available, sell the asset first
                 order_result = await place_market_order(pair, 'sell', asset_balance)
                 if order_result:
                     await send_telegram_message(f"Sold {asset_balance} of {asset} manually. Converting to USDT.")
-                    await asyncio.sleep(2)  # Allow some time for the market to update
+                    await asyncio.sleep(2)
                     return await convert_to_usdt(pair)
         else:
             logger.info(f"No {asset} balance to convert to USDT")
@@ -247,6 +238,7 @@ async def advanced_trade():
     while True:
         try:
             for pair in pairs:
+                logger.info(f"\n= = = = = = = =\n")
                 logger.info(f"Processing pair: {pair}")
 
                 # Fetch and analyze order book
