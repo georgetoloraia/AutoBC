@@ -24,7 +24,10 @@ exchange = ccxt.binance({
 async def get_tradeable_pairs(quote_currency):
     try:
         await exchange.load_markets()
-        return [symbol for symbol in exchange.symbols if quote_currency in symbol.split('/')]
+        
+        tradeable_pairs = [symbol for symbol in exchange.symbols if quote_currency in symbol.split('/')]
+
+        return tradeable_pairs
     except Exception as e:
         logger.error(f"Error loading markets: {e}")
         return []
@@ -223,6 +226,14 @@ async def convert_to_usdt(pair):
         logger.error(f"An error occurred converting {pair} to USDT: {e}")
     return None
 
+async def get_desired_tradeable_pairs():
+    try:
+        await exchange.load_markets()
+        return [symbol for symbol in settings.DESIRED_COINS if symbol in exchange.symbols]
+    except Exception as e:
+        logger.error(f"Error loading markets: {e}")
+        return []
+
 async def get_current_price(pair):
     try:
         ticker = await exchange.fetch_ticker(pair)
@@ -234,7 +245,11 @@ async def get_current_price(pair):
         return None
 
 async def advanced_trade():
-    pairs = await get_tradeable_pairs(settings.quote_currency)
+    if settings.quote_currency:
+        quote_currency = 'USDT'
+        pairs = await get_tradeable_pairs(quote_currency)
+    else:
+        pairs = await get_desired_tradeable_pairs()
     while True:
         try:
             for pair in pairs:

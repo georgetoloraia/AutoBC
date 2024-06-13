@@ -36,6 +36,8 @@ def simplified_evaluate_trading_signals(data):
         buy_confidence = sum([1 if cond else 0 for cond in buy_conditions]) / len(buy_conditions)
         sell_confidence = sum([1 if cond else 0 for cond in sell_conditions]) / len(sell_conditions)
 
+        logger.info(f"\n* * * * * * *\nbuy_condintions: {buy_conditions}\nbuy_confidence: {buy_confidence}\n* * * * * * * * * \n")
+
         if all(buy_conditions):
             logger.info(f"Simplified Buy signal conditions met in {timeframe} timeframe.")
             signals[timeframe] = ('buy', buy_confidence)
