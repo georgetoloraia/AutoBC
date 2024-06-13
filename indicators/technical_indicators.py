@@ -22,4 +22,8 @@ def calculate_indicators(df):
     df['vwap'] = (df['volume'] * df['close']).cumsum() / df['volume'].cumsum()
     df['typprice'] = talib.TYPPRICE(df['high'], df['low'], df['close'])
 
+    #-
+    df['+DI'] = talib.PLUS_DI(df['high'], df['low'], df['close'], timeperiod=14)
+    df['-DI'] = talib.MINUS_DI(df['high'], df['low'], df['close'], timeperiod=14)
+
     return df
