@@ -39,7 +39,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['3m', '5m',], limit=1000):
+async def fetch_historical_prices(pair, timeframes=['1m'], limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
@@ -157,7 +157,7 @@ def determine_final_signal(order_book, trades, historical_prices):
     # Calculate the percentage of bid volume over total volume
     # bid_ratio = total_bid_volume / (total_bid_volume + total_ask_volume) if (total_bid_volume + total_ask_volume) > 0 else 0
     # Calculate the percentage of buy volume over total trade volume
-    buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
+    # buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
 
     # logger.info(f"========\n\
     #             bid_ratio: {bid_ratio}\n\
@@ -166,10 +166,10 @@ def determine_final_signal(order_book, trades, historical_prices):
     #             ==========")
 
     # Check if more than 80% of the volume are bids and buys respectively
-    if buy_ratio >= 0.7 and final_action == 'buy':
+    if final_action == 'buy':
         logger.info("Final decision: BUY - bid and buy volumes are both above 80%")
         return 'buy'
-    elif buy_ratio < 0.3 and final_action == 'sell':
+    elif final_action == 'sell':
         logger.info("Final decision: SELL - ask and sell volumes are both above 80%")
         return 'sell'
     else:
