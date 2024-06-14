@@ -142,6 +142,7 @@ def determine_final_signal(order_book, trades, historical_prices):
     # Use the most frequent action as the final action
     final_action = max(set(final_actions), key=final_actions.count) if final_actions else None
     final_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0
+    print(f"\nfin***all**\n{confidence_scores}\nfinall***")
 
     logger.info(f"Order Book - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
     logger.info(f"Recent Trades - Buy Volume: {buy_volume}, Sell Volume: {sell_volume}")
@@ -157,10 +158,11 @@ def determine_final_signal(order_book, trades, historical_prices):
                 bid_ratio: {bid_ratio}\n\
                 buy_ratio: {buy_ratio}\n\
                 final_action: {final_action}\n\
+                final_confidence: {final_confidence}\n\
                 ==========")
 
     # Check if more than 55% of the volume are bids and buys respectively
-    if bid_ratio >= 0.5 and buy_ratio >= 0.5 and final_action == 'buy' and final_confidence > 0.5:
+    if bid_ratio >= 0.5 and buy_ratio >= 0.5 and final_action == 'buy' and final_confidence >= 0.5:
         logger.info("Final decision: BUY - bid and buy volumes are both above 55%")
         return 'buy'
     elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell' and final_confidence > 0.75:
