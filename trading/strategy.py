@@ -16,11 +16,11 @@ def simplified_evaluate_trading_signals(data):
         # Buy conditions
         buy_conditions = [
             latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
-            latest['rsi'] < 35,  # RSI below 35
+            latest['rsi'] < 30,  # RSI below 35
             latest['macd'] > latest['macd_signal'],  # MACD bullish crossover
             latest['adx'] > 30 and latest['+DI'] > latest['-DI'],  # ADX indicating strong trend
             latest['close'] > latest['vwap'],  # Price above VWAP
-            latest['mfi'] < 25  # Money Flow Index indicating oversold
+            latest['mfi'] < 20  # Money Flow Index indicating oversold
         ]
 
         # Sell conditions
@@ -36,7 +36,7 @@ def simplified_evaluate_trading_signals(data):
         buy_confidence = sum([1 if cond else 0 for cond in buy_conditions]) / len(buy_conditions)
         sell_confidence = sum([1 if cond else 0 for cond in sell_conditions]) / len(sell_conditions)
 
-        logger.info(f"\n* * * * * * *\nbuy_condintions: {buy_conditions}\nbuy_confidence: {buy_confidence}\n* * * * * * * * * \n")
+        # logger.info(f"\n* * * * * * *\nbuy_condintions: {buy_conditions}\nbuy_confidence: {buy_confidence}\n* * * * * * * * * \n")
 
         if buy_confidence >= 0.55:
             logger.info(f"Simplified Buy signal conditions met in {timeframe} timeframe.")

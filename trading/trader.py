@@ -154,12 +154,12 @@ def determine_final_signal(order_book, trades, historical_prices):
     # Calculate the percentage of buy volume over total trade volume
     buy_ratio = buy_volume / (buy_volume + sell_volume) if (buy_volume + sell_volume) > 0 else 0
 
-    logger.info(f"========\n\
-                bid_ratio: {bid_ratio}\n\
-                buy_ratio: {buy_ratio}\n\
-                final_action: {final_action}\n\
-                final_confidence: {final_confidence}\n\
-                ==========")
+    # logger.info(f"========\n\
+    #             bid_ratio: {bid_ratio}\n\
+    #             buy_ratio: {buy_ratio}\n\
+    #             final_action: {final_action}\n\
+    #             final_confidence: {final_confidence}\n\
+    #             ==========")
 
     # Check if more than 55% of the volume are bids and buys respectively
     if bid_ratio >= 0.5 and buy_ratio >= 0.5 and final_action == 'buy' and final_confidence >= 0.5:
