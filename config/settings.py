@@ -29,4 +29,6 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "COMBO/USDT",
                  "PEOPLE/USDT",
                  "PEPE/USDT",
+                 "BAKE/USDT",
+                 "COS/USDT",
                  ]
