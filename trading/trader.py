@@ -83,7 +83,7 @@ def analyze_order_book(order_book):
     
     bid_ask_spread = asks[0][0] - bids[0][0] if bids and asks else 0
     
-    logger.info(f"Order Book Analysis - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
+    # logger.info(f"Order Book Analysis - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
     
     return total_bid_volume, total_ask_volume, bid_ask_spread
 
@@ -289,21 +289,25 @@ async def advanced_trade():
                             buy_price = await get_current_price(pair)
                             # Monitor position for stop-loss or take-profit
                             while True:
-                                current_price = await get_current_price(pair)
-                                if current_price is None:
-                                    logger.error("Failed to fetch current price during monitoring.")
-                                    break
-                                if current_price <= buy_price * (1 - settings.stop_loss_percentage):
-                                    logger.info(f"Stop-loss triggered for {pair} at {current_price}")
-                                    await convert_to_usdt(pair)
-                                    await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
-                                    break
-                                elif current_price >= buy_price * (1 + settings.take_profit_percentage):
-                                    logger.info(f"Take-profit triggered for {pair} at {current_price}")
-                                    await convert_to_usdt(pair)
-                                    await send_telegram_message(f"Take-profit triggered for {pair} at {current_price}.")
-                                    break
-                                await asyncio.sleep(60)  # Check every minute
+                                try:
+                                    current_price = await get_current_price(pair)
+                                    if current_price is None:
+                                        logger.error("Failed to fetch current price during monitoring.")
+                                        break
+                                    if current_price <= buy_price * (1 - settings.stop_loss_percentage):
+                                        logger.info(f"Stop-loss triggered for {pair} at {current_price}")
+                                        await convert_to_usdt(pair)
+                                        await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
+                                        break
+                                    elif current_price >= buy_price * (1 + settings.take_profit_percentage):
+                                        logger.info(f"Take-profit triggered for {pair} at {current_price}")
+                                        await convert_to_usdt(pair)
+                                        await send_telegram_message(f"Take-profit triggered for {pair} at {current_price}.")
+                                        break
+                                    await asyncio.sleep(60)  # Check every minute
+                                except Exception as e:
+                                    logger.error(f"error")
+                                    continue
                     elif final_action == 'sell':
                         asset = pair.split('/')[0]
                         asset_balance = await get_balance(asset)
