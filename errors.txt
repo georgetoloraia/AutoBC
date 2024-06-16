@@ -1,2 +1,45 @@
-[ERROR] Error fetching current price for AMP/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=AMPUSDT
-2024-06-16 05:36:10,816 [ERROR] Failed to fetch current price during monitoring.
+2024-06-16 11:24:36,772 [INFO] Current market price for BB/USDT: 0.5604
+2024-06-16 11:25:37,251 [INFO] Current market price for BB/USDT: 0.5614
+2024-06-16 11:26:37,852 [INFO] Current market price for BB/USDT: 0.5615
+2024-06-16 11:27:38,326 [INFO] Current market price for BB/USDT: 0.5622
+2024-06-16 11:28:38,793 [INFO] Current market price for BB/USDT: 0.5611
+2024-06-16 11:29:39,280 [INFO] Current market price for BB/USDT: 0.5609
+2024-06-16 11:30:39,754 [INFO] Current market price for BB/USDT: 0.5609
+2024-06-16 11:31:40,228 [INFO] Current market price for BB/USDT: 0.5606
+2024-06-16 11:32:40,706 [INFO] Current market price for BB/USDT: 0.5602
+2024-06-16 11:33:41,182 [INFO] Current market price for BB/USDT: 0.5607
+2024-06-16 11:34:41,650 [INFO] Current market price for BB/USDT: 0.5602
+2024-06-16 11:35:42,126 [INFO] Current market price for BB/USDT: 0.5586
+2024-06-16 11:36:42,617 [INFO] Current market price for BB/USDT: 0.5584
+2024-06-16 11:37:43,165 [INFO] Current market price for BB/USDT: 0.5587
+2024-06-16 11:38:53,817 [ERROR] Error fetching current price for BB/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=BBUSDT
+2024-06-16 11:39:03,204 [ERROR] Error fetching current price for BB/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=BBUSDT
+2024-06-16 11:39:18,816 [ERROR] Error fetching current price for BB/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=BBUSDT
+2024-06-16 11:39:18,816 [ERROR] Failed to fetch current price during monitoring.
+2024-06-16 11:39:19,818 [INFO] 
+= = = = = = = =
+
+2024-06-16 11:39:19,818 [INFO] Processing pair: NOT/USDT
+2024-06-16 11:39:28,251 [ERROR] Error fetching order book for NOT/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=NOTUSDT
+2024-06-16 11:39:28,252 [INFO] 
+= = = = = = = =
+
+2024-06-16 11:39:28,252 [INFO] Processing pair: COMBO/USDT
+2024-06-16 11:39:38,815 [ERROR] Error fetching order book for COMBO/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=COMBOUSDT
+2024-06-16 11:39:38,816 [INFO] 
+= = = = = = = =
+
+2024-06-16 11:39:38,816 [INFO] Processing pair: PEOPLE/USDT
+2024-06-16 11:39:48,323 [ERROR] Error fetching order book for PEOPLE/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=PEOPLEUSDT
+2024-06-16 11:39:48,324 [INFO] 
+= = = = = = = =
+
+2024-06-16 11:39:48,324 [INFO] Processing pair: PEPE/USDT
+2024-06-16 11:39:58,816 [ERROR] Error fetching order book for PEPE/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=PEPEUSDT
+2024-06-16 11:39:58,816 [INFO] 
+= = = = = = = =
+
+2024-06-16 11:39:58,816 [INFO] Processing pair: BAKE/USDT
+2024-06-16 11:40:08,395 [ERROR] Error fetching order book for BAKE/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=BAKEUSDT
+2024-06-16 11:40:08,395 [INFO] 
+= = = = = = = =
