@@ -43,7 +43,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['1m', '3m', '5m', '15m'], limit=1000):
+async def fetch_historical_prices(pair, timeframes=['1s', '1m', '3m', '5m', '15m'], limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
