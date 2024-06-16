@@ -1,0 +1,2 @@
+[ERROR] Error fetching current price for AMP/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=AMPUSDT
+2024-06-16 05:36:10,816 [ERROR] Failed to fetch current price during monitoring.
