@@ -43,7 +43,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['1s', '1m', '3m', '5m', '15m', '1h'], limit=1000):
+async def fetch_historical_prices(pair, timeframes=['1m', '3m', '5m', '15m'], limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
@@ -236,15 +236,19 @@ async def get_desired_tradeable_pairs():
         logger.error(f"Error loading markets: {e}")
         return []
 
-async def get_current_price(pair):
-    try:
-        ticker = await exchange.fetch_ticker(pair)
-        current_price = ticker['last']
-        logger.info(f"Current market price for {pair}: {current_price}")
-        return current_price
-    except Exception as e:
-        logger.error(f"Error fetching current price for {pair}: {e}")
-        return None
+async def get_current_price(pair, retries=3, delay=5):
+    for attempt in range(retries):
+        try:
+            ticker = await exchange.fetch_ticker(pair)
+            current_price = ticker['last']
+            logger.info(f"Current market price for {pair}: {current_price}")
+            return current_price
+        except Exception as e:
+            logger.error(f"Error fetching current price for {pair}: {e}")
+            if attempt < retries - 1:
+                await asyncio.sleep(delay)
+            else:
+                return None
 
 async def advanced_trade():
     if settings.quote_currency:

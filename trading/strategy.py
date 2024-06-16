@@ -5,7 +5,16 @@ logger = logging.getLogger(__name__)
 
 def simplified_evaluate_trading_signals(data):
     signals = {}
-    for timeframe, df in data.items():
+    timeframe_to_check = ['1m', '3m', '5m', '15m']
+
+    buy_signals_count = 0
+
+    # for timeframe, df in data.items():
+    for timeframe in timeframe_to_check:
+        if timeframe not in data:
+            logger.info(f"No data available for {timeframe}")
+            continue
+        df = data[timeframe]
         if df.empty:
             logger.info(f"DataFrame is empty for {timeframe} timeframe.")
             continue
@@ -38,10 +47,15 @@ def simplified_evaluate_trading_signals(data):
 
         # logger.info(f"\n* * * * * * *\nbuy_condintions: {buy_conditions}\nbuy_confidence: {buy_confidence}\n* * * * * * * * * \n")
 
-        if buy_confidence >= 0.55:
+        if buy_confidence >= 0.5:
             logger.info(f"Simplified Buy signal conditions met in {timeframe} timeframe.")
-            signals[timeframe] = ('buy', buy_confidence)
+            # signals[timeframe] = ('buy', buy_confidence)
+            buy_signals_count += 1
         elif all(sell_conditions):
             logger.info(f"Simplified Sell signal conditions met in {timeframe} timeframe.")
             signals[timeframe] = ('sell', sell_confidence)
+
+    if buy_signals_count >= 2:
+        signals[timeframe] = ('buy', buy_confidence)
+
     return signals
