@@ -319,7 +319,8 @@ async def advanced_trade():
                             await place_market_order(pair, 'sell', asset_balance)
                             await convert_to_usdt(pair)
                             await send_telegram_message(f"The {pair} : Converted in USDT.")
-                await asyncio.sleep(1)  # Short delay to prevent hitting rate limits
+                await asyncio.sleep(2)  # Short delay to prevent hitting rate limits
+            await asyncio.sleep(90)
         except Exception as e:
             logger.error(f"An error occurred during trading: {e}")
             await asyncio.sleep(60)  # Wait for 1 minute before retrying
