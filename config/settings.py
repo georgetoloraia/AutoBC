@@ -36,4 +36,5 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "STMX/USDT",
                  "MBL/USDT",
                  "AERGO/USDT",
+                 "ZK/USDT",
                  ]
