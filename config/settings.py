@@ -15,7 +15,7 @@ initial_investment = 5.0  # investment amount | Modifi if need
 rsi_period = 14  # User's RSI period
 commission_rate = 0.005  #| Modifi if need
 stop_loss_percentage = 0.01  # | Modifi if need
-take_profit_percentage = 0.035  # | Modifi if need
+take_profit_percentage = 0.1  # | Modifi if need
 
 DESIRED_COINS = ["1000SATS/USDT",
                  "SOL/USDT",
@@ -33,4 +33,7 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "XAI/USDT",
                  "IMX/USDT",
                  "FLOKI/USDT",
+                 "STMX/USDT",
+                 "MBL/USDT",
+                 "AERGO/USDT",
                  ]

@@ -47,7 +47,7 @@ def simplified_evaluate_trading_signals(data):
 
         # logger.info(f"\n* * * * * * *\nbuy_condintions: {buy_conditions}\nbuy_confidence: {buy_confidence}\n* * * * * * * * * \n")
 
-        if buy_confidence >= 0.5:
+        if buy_confidence >= 0.6 and latest['mfi'] >= 80:
             logger.info(f"Simplified Buy signal conditions met in {timeframe} timeframe.")
             # signals[timeframe] = ('buy', buy_confidence)
             buy_signals_count += 1
