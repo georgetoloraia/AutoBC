@@ -5,7 +5,7 @@
 2024-06-19 07:30:26,054 [INFO] Final action for AEUR/USDT: buy
 2024-06-19 07:30:26,426 [INFO] Available balance for USDT: 6.23434999
 2024-06-19 07:30:26,945 [ERROR] An error occurred placing a buy order for AEUR/USDT: binance Account has insufficient balance for requested action.
-2024-06-19 07:30:27,236 [INFO] HTTP Request: POST https://api.telegram.org/bot6526185567:AAHt8a2409V36PAwaL9y4uPw2YZC1ytrFyo/sendMessage "HTTP/1.1 200 OK"
+2024-06-19 07:30:27,236 [INFO] 1ytrFyo/sendMessage "HTTP/1.1 200 OK"
 2024-06-19 07:30:29,240 [INFO] 
 = = = = = = = =
 
@@ -16,7 +16,7 @@
 2024-06-19 07:30:32,335 [INFO] Final action for AEVO/USDT: buy
 2024-06-19 07:30:32,704 [INFO] Available balance for USDT: 6.23434999
 2024-06-19 07:30:33,218 [ERROR] An error occurred placing a buy order for AEVO/USDT: binance {"code":-1013,"msg":"Filter failure: NOTIONAL"}
-2024-06-19 07:30:33,477 [INFO] HTTP Request: POST https://api.telegram.org/bot6526185567:AAHt8a2409V36PAwaL9y4uPw2YZC1ytrFyo/sendMessage "HTTP/1.1 200 OK"
+2024-06-19 07:30:33,477 [INFO] 1ytrFyo/sendMessage "HTTP/1.1 200 OK"
 2024-06-19 07:30:35,483 [INFO] 
 = = = = = = = =
 
