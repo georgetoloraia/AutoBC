@@ -1,45 +1,28 @@
-2024-06-16 11:24:36,772 [INFO] Current market price for BB/USDT: 0.5604
-2024-06-16 11:25:37,251 [INFO] Current market price for BB/USDT: 0.5614
-2024-06-16 11:26:37,852 [INFO] Current market price for BB/USDT: 0.5615
-2024-06-16 11:27:38,326 [INFO] Current market price for BB/USDT: 0.5622
-2024-06-16 11:28:38,793 [INFO] Current market price for BB/USDT: 0.5611
-2024-06-16 11:29:39,280 [INFO] Current market price for BB/USDT: 0.5609
-2024-06-16 11:30:39,754 [INFO] Current market price for BB/USDT: 0.5609
-2024-06-16 11:31:40,228 [INFO] Current market price for BB/USDT: 0.5606
-2024-06-16 11:32:40,706 [INFO] Current market price for BB/USDT: 0.5602
-2024-06-16 11:33:41,182 [INFO] Current market price for BB/USDT: 0.5607
-2024-06-16 11:34:41,650 [INFO] Current market price for BB/USDT: 0.5602
-2024-06-16 11:35:42,126 [INFO] Current market price for BB/USDT: 0.5586
-2024-06-16 11:36:42,617 [INFO] Current market price for BB/USDT: 0.5584
-2024-06-16 11:37:43,165 [INFO] Current market price for BB/USDT: 0.5587
-2024-06-16 11:38:53,817 [ERROR] Error fetching current price for BB/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=BBUSDT
-2024-06-16 11:39:03,204 [ERROR] Error fetching current price for BB/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=BBUSDT
-2024-06-16 11:39:18,816 [ERROR] Error fetching current price for BB/USDT: binance GET https://api.binance.com/api/v3/ticker/24hr?symbol=BBUSDT
-2024-06-16 11:39:18,816 [ERROR] Failed to fetch current price during monitoring.
-2024-06-16 11:39:19,818 [INFO] 
+2024-06-19 07:30:23,115 [INFO] Processing pair: AEUR/USDT
+2024-06-19 07:30:26,026 [INFO] Recent Trades Analysis - Buy Volume: 70124.09999999987, Sell Volume: 112435.7000000002
+2024-06-19 07:30:26,033 [INFO] Simplified Buy signal conditions met in 1s timeframe.
+2024-06-19 07:30:26,054 [INFO] Final decision: BUY - bid and buy volumes are both above 55%
+2024-06-19 07:30:26,054 [INFO] Final action for AEUR/USDT: buy
+2024-06-19 07:30:26,426 [INFO] Available balance for USDT: 6.23434999
+2024-06-19 07:30:26,945 [ERROR] An error occurred placing a buy order for AEUR/USDT: binance Account has insufficient balance for requested action.
+2024-06-19 07:30:27,236 [INFO] HTTP Request: POST https://api.telegram.org/bot6526185567:AAHt8a2409V36PAwaL9y4uPw2YZC1ytrFyo/sendMessage "HTTP/1.1 200 OK"
+2024-06-19 07:30:29,240 [INFO] 
 = = = = = = = =
 
-2024-06-16 11:39:19,818 [INFO] Processing pair: NOT/USDT
-2024-06-16 11:39:28,251 [ERROR] Error fetching order book for NOT/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=NOTUSDT
-2024-06-16 11:39:28,252 [INFO] 
+2024-06-19 07:30:29,240 [INFO] Processing pair: AEVO/USDT
+2024-06-19 07:30:32,308 [INFO] Recent Trades Analysis - Buy Volume: 808323.05, Sell Volume: 671029.5499999998
+2024-06-19 07:30:32,314 [INFO] Simplified Buy signal conditions met in 1s timeframe.
+2024-06-19 07:30:32,335 [INFO] Final decision: BUY - bid and buy volumes are both above 55%
+2024-06-19 07:30:32,335 [INFO] Final action for AEVO/USDT: buy
+2024-06-19 07:30:32,704 [INFO] Available balance for USDT: 6.23434999
+2024-06-19 07:30:33,218 [ERROR] An error occurred placing a buy order for AEVO/USDT: binance {"code":-1013,"msg":"Filter failure: NOTIONAL"}
+2024-06-19 07:30:33,477 [INFO] HTTP Request: POST https://api.telegram.org/bot6526185567:AAHt8a2409V36PAwaL9y4uPw2YZC1ytrFyo/sendMessage "HTTP/1.1 200 OK"
+2024-06-19 07:30:35,483 [INFO] 
 = = = = = = = =
 
-2024-06-16 11:39:28,252 [INFO] Processing pair: COMBO/USDT
-2024-06-16 11:39:38,815 [ERROR] Error fetching order book for COMBO/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=COMBOUSDT
-2024-06-16 11:39:38,816 [INFO] 
-= = = = = = = =
-
-2024-06-16 11:39:38,816 [INFO] Processing pair: PEOPLE/USDT
-2024-06-16 11:39:48,323 [ERROR] Error fetching order book for PEOPLE/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=PEOPLEUSDT
-2024-06-16 11:39:48,324 [INFO] 
-= = = = = = = =
-
-2024-06-16 11:39:48,324 [INFO] Processing pair: PEPE/USDT
-2024-06-16 11:39:58,816 [ERROR] Error fetching order book for PEPE/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=PEPEUSDT
-2024-06-16 11:39:58,816 [INFO] 
-= = = = = = = =
-
-2024-06-16 11:39:58,816 [INFO] Processing pair: BAKE/USDT
-2024-06-16 11:40:08,395 [ERROR] Error fetching order book for BAKE/USDT: binance GET https://api.binance.com/api/v3/depth?symbol=BAKEUSDT
-2024-06-16 11:40:08,395 [INFO] 
-= = = = = = = =
+2024-06-19 07:30:35,483 [INFO] Processing pair: AGIX/USDT
+2024-06-19 07:30:38,378 [INFO] Recent Trades Analysis - Buy Volume: 307501.0, Sell Volume: 240455.0
+2024-06-19 07:30:38,385 [INFO] Simplified Buy signal conditions met in 1s timeframe.
+2024-06-19 07:30:38,406 [INFO] Final decision: NONE - conditions not met for either buy or sell
+2024-06-19 07:30:38,407 [INFO] Final action for AGIX/USDT: None
+2024-06-19 07:30:40,409 [INFO] 

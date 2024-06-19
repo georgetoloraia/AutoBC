@@ -141,7 +141,7 @@ def determine_final_signal(order_book, trades, historical_prices):
 
     # Use the most frequent action as the final action
     final_action = max(set(final_actions), key=final_actions.count) if final_actions else None
-    # final_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0
+    final_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0
     # print(f"\nfin***all**\n{confidence_scores}\nfinall***")
 
     # logger.info(f"Order Book - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Bid-Ask Spread: {bid_ask_spread}")
@@ -162,7 +162,7 @@ def determine_final_signal(order_book, trades, historical_prices):
     #             ==========")
 
     # Check if more than 55% of the volume are bids and buys respectively
-    if bid_ratio >= 0.6 and buy_ratio >= 0.6 and final_action == 'buy': #and final_confidence >= 0.5:
+    if bid_ratio >= 0.6 or buy_ratio >= 0.6 and final_action == 'buy' and final_confidence >= 0.5:
         logger.info("Final decision: BUY - bid and buy volumes are both above 55%")
         return 'buy'
     elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell': #and final_confidence > 0.75:
@@ -284,7 +284,7 @@ async def advanced_trade():
                 if final_action:
                     usdt_balance = await get_balance('USDT')
                     if final_action == 'buy' and usdt_balance > settings.initial_investment:
-                        amount_to_buy = (usdt_balance * (1 - settings.commission_rate)) / order_book['asks'][0][0] if order_book['asks'] else 0
+                        amount_to_buy = usdt_balance#(usdt_balance * (1 - settings.commission_rate)) / order_book['asks'][0][0] if order_book['asks'] else 0
                         if amount_to_buy <= 0:
                             logger.error("Calculated amount to buy is zero or negative.")
                             continue
@@ -315,8 +315,8 @@ async def advanced_trade():
                     elif final_action == 'sell':
                         asset = pair.split('/')[0]
                         asset_balance = await get_balance(asset)
-                        if asset_balance > 0:
-                            await place_market_order(pair, 'sell', asset_balance)
+                        if asset_balance > 1:
+                            # await place_market_order(pair, 'sell', asset_balance)
                             await convert_to_usdt(pair)
                             await send_telegram_message(f"The {pair} : Converted in USDT.")
                 await asyncio.sleep(2)  # Short delay to prevent hitting rate limits
