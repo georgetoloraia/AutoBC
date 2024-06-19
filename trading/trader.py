@@ -250,12 +250,86 @@ async def get_current_price(pair, retries=3, delay=5):
             else:
                 return None
 
+# async def advanced_trade():
+#     if settings.quote_currency:
+#         quote_currency = 'USDT'
+#         pairs = await get_tradeable_pairs(quote_currency)
+#     else:
+#         pairs = await get_desired_tradeable_pairs()
+#     while True:
+#         try:
+#             for pair in pairs:
+#                 logger.info(f"\n= = = = = = = =\n")
+#                 logger.info(f"Processing pair: {pair}")
+
+#                 # Fetch and analyze order book
+#                 order_book = await fetch_order_book(pair)
+#                 if not order_book:
+#                     continue
+
+#                 # Fetch and analyze recent trades
+#                 recent_trades = await fetch_recent_trades(pair)
+#                 if not recent_trades:
+#                     continue
+
+#                 # Fetch historical prices for multiple timeframes
+#                 historical_prices = await fetch_historical_prices(pair)
+#                 if not historical_prices:
+#                     continue
+
+#                 # Determine the final signal
+#                 final_action = determine_final_signal(order_book, recent_trades, historical_prices)
+#                 logger.info(f"Final action for {pair}: {final_action}")
+
+#                 if final_action:
+#                     usdt_balance = await get_balance('USDT')
+#                     if final_action == 'buy' and usdt_balance > settings.initial_investment:
+#                         amount_to_buy = usdt_balance#(usdt_balance * (1 - settings.commission_rate)) / order_book['asks'][0][0] if order_book['asks'] else 0
+#                         if amount_to_buy <= 0:
+#                             logger.error("Calculated amount to buy is zero or negative.")
+#                             continue
+#                         buy_order = await place_market_order(pair, 'buy', amount_to_buy)
+#                         if buy_order:
+#                             buy_price = await get_current_price(pair)
+#                             # Monitor position for stop-loss or take-profit
+#                             while True:
+#                                 try:
+#                                     current_price = await get_current_price(pair)
+#                                     if current_price is None:
+#                                         logger.error("Failed to fetch current price during monitoring.")
+#                                         break
+#                                     if current_price <= buy_price * (1 - settings.stop_loss_percentage):
+#                                         logger.info(f"Stop-loss triggered for {pair} at {current_price}")
+#                                         await convert_to_usdt(pair)
+#                                         await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
+#                                         break
+#                                     elif current_price >= buy_price * (1 + settings.take_profit_percentage):
+#                                         logger.info(f"Take-profit triggered for {pair} at {current_price}")
+#                                         await convert_to_usdt(pair)
+#                                         await send_telegram_message(f"Take-profit triggered for {pair} at {current_price}.")
+#                                         break
+#                                     await asyncio.sleep(60)  # Check every minute
+#                                 except Exception as e:
+#                                     logger.error(f"error")
+#                                     continue
+#                     elif final_action == 'sell':
+#                         asset = pair.split('/')[0]
+#                         asset_balance = await get_balance(asset)
+#                         if asset_balance > 1:
+#                             # await place_market_order(pair, 'sell', asset_balance)
+#                             await convert_to_usdt(pair)
+#                             await send_telegram_message(f"The {pair} : Converted in USDT.")
+#                 await asyncio.sleep(2)  # Short delay to prevent hitting rate limits
+#             await asyncio.sleep(90)
+#         except Exception as e:
+#             logger.error(f"An error occurred during trading: {e}")
+#             await asyncio.sleep(60)  # Wait for 1 minute before retrying
+
+
+
+
 async def advanced_trade():
-    if settings.quote_currency:
-        quote_currency = 'USDT'
-        pairs = await get_tradeable_pairs(quote_currency)
-    else:
-        pairs = await get_desired_tradeable_pairs()
+    pairs = await get_tradeable_pairs(settings.quote_currency)
     while True:
         try:
             for pair in pairs:
@@ -284,34 +358,37 @@ async def advanced_trade():
                 if final_action:
                     usdt_balance = await get_balance('USDT')
                     if final_action == 'buy' and usdt_balance > settings.initial_investment:
-                        amount_to_buy = usdt_balance#(usdt_balance * (1 - settings.commission_rate)) / order_book['asks'][0][0] if order_book['asks'] else 0
+                        amount_to_buy = (usdt_balance * (1 - settings.commission_rate)) / order_book['asks'][0][0] if order_book['asks'] else 0
                         if amount_to_buy <= 0:
                             logger.error("Calculated amount to buy is zero or negative.")
                             continue
+                        
+                        # Ensure the amount to buy meets the minimum notional value
+                        minimum_notional = 5  # Set this to the exchange's minimum notional value (e.g., $5)
+                        if amount_to_buy * order_book['asks'][0][0] < minimum_notional:
+                            logger.error(f"Order value {amount_to_buy * order_book['asks'][0][0]} is below the minimum notional value {minimum_notional}.")
+                            continue
+                        
                         buy_order = await place_market_order(pair, 'buy', amount_to_buy)
                         if buy_order:
                             buy_price = await get_current_price(pair)
                             # Monitor position for stop-loss or take-profit
                             while True:
-                                try:
-                                    current_price = await get_current_price(pair)
-                                    if current_price is None:
-                                        logger.error("Failed to fetch current price during monitoring.")
-                                        break
-                                    if current_price <= buy_price * (1 - settings.stop_loss_percentage):
-                                        logger.info(f"Stop-loss triggered for {pair} at {current_price}")
-                                        await convert_to_usdt(pair)
-                                        await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
-                                        break
-                                    elif current_price >= buy_price * (1 + settings.take_profit_percentage):
-                                        logger.info(f"Take-profit triggered for {pair} at {current_price}")
-                                        await convert_to_usdt(pair)
-                                        await send_telegram_message(f"Take-profit triggered for {pair} at {current_price}.")
-                                        break
-                                    await asyncio.sleep(60)  # Check every minute
-                                except Exception as e:
-                                    logger.error(f"error")
-                                    continue
+                                current_price = await get_current_price(pair)
+                                if current_price is None:
+                                    logger.error("Failed to fetch current price during monitoring.")
+                                    break
+                                if current_price <= buy_price * (1 - settings.stop_loss_percentage):
+                                    logger.info(f"Stop-loss triggered for {pair} at {current_price}")
+                                    await convert_to_usdt(pair)
+                                    await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
+                                    break
+                                elif current_price >= buy_price * (1 + settings.take_profit_percentage):
+                                    logger.info(f"Take-profit triggered for {pair} at {current_price}")
+                                    await convert_to_usdt(pair)
+                                    await send_telegram_message(f"Take-profit triggered for {pair} at {current_price}.")
+                                    break
+                                await asyncio.sleep(60)  # Check every minute
                     elif final_action == 'sell':
                         asset = pair.split('/')[0]
                         asset_balance = await get_balance(asset)
@@ -319,8 +396,7 @@ async def advanced_trade():
                             # await place_market_order(pair, 'sell', asset_balance)
                             await convert_to_usdt(pair)
                             await send_telegram_message(f"The {pair} : Converted in USDT.")
-                await asyncio.sleep(2)  # Short delay to prevent hitting rate limits
-            await asyncio.sleep(90)
+                await asyncio.sleep(1)  # Short delay to prevent hitting rate limits
         except Exception as e:
             logger.error(f"An error occurred during trading: {e}")
             await asyncio.sleep(60)  # Wait for 1 minute before retrying
