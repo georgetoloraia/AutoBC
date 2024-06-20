@@ -14,7 +14,7 @@ quote_currency = True
 initial_investment = 5.0  # investment amount | Modifi if need
 rsi_period = 14  # User's RSI period
 commission_rate = 0.05  #| Modifi if need
-stop_loss_percentage = 0.01  # | Modifi if need
+stop_loss_percentage = 0.02  # | Modifi if need
 take_profit_percentage = 0.05  # | Modifi if need
 
 DESIRED_COINS = ["1000SATS/USDT",

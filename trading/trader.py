@@ -43,7 +43,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['1s', '1m', '3m', '5m', '15m'], limit=1000):
+async def fetch_historical_prices(pair, timeframes=['1m', '5m', '1h', '1d'], limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
@@ -162,7 +162,7 @@ def determine_final_signal(order_book, trades, historical_prices):
     #             ==========")
 
     # Check if more than 55% of the volume are bids and buys respectively
-    if bid_ratio >= 0.6 or buy_ratio >= 0.6 and final_action == 'buy' and final_confidence >= 0.5:
+    if bid_ratio > 0.6 or buy_ratio > 0.6 and final_action == 'buy' and final_confidence > 0.5:
         logger.info("Final decision: BUY - bid and buy volumes are both above 55%")
         return 'buy'
     elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell': #and final_confidence > 0.75:
@@ -329,7 +329,12 @@ async def get_current_price(pair, retries=3, delay=5):
 
 
 async def advanced_trade():
-    pairs = await get_tradeable_pairs(settings.quote_currency)
+    # pairs = await get_tradeable_pairs(settings.quote_currency)
+    if settings.quote_currency:
+        quote_currency = 'USDT'
+        pairs = await get_tradeable_pairs(quote_currency)
+    else:
+        pairs = await get_desired_tradeable_pairs()
     while True:
         try:
             for pair in pairs:
