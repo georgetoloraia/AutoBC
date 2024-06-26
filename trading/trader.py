@@ -390,12 +390,15 @@ async def advanced_trade():
                                     await convert_to_usdt(pair)
                                     await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
                                     break
-                                elif current_price >= buy_price * (1 + settings.take_profit_percentage):
-                                    needPrice = buy_price * (1 + settings.take_profit_percentage)
-                                    logger.info(f"Take-profit triggered for {pair} at {current_price}")
-                                    await convert_to_usdt(pair)
-                                    await send_telegram_message(f"BUY: {pair} at {current_price}.\nBuy-price: {buy_price}\nNeedPrice: {needPrice}")
-                                    break
+                                # elif current_price >= buy_price * (1 + settings.take_profit_percentage):
+                                #     needPrice = buy_price * (1 + settings.take_profit_percentage)
+                                #     logger.info(f"Take-profit triggered for {pair} at {current_price}")
+                                #     await convert_to_usdt(pair)
+                                #     await send_telegram_message(f"BUY: {pair} at {current_price}.\nBuy-price: {buy_price}\nNeedPrice: {needPrice}")
+                                #     break
+                                if current_price > buy_price:
+                                    buy_price = current_price
+                                    
                                 await asyncio.sleep(60)  # Check every minute
                     elif final_action == 'sell':
                         asset = pair.split('/')[0]
