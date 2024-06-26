@@ -162,7 +162,7 @@ def determine_final_signal(order_book, trades, historical_prices):
     #             ==========")
 
     # Check if more than 55% of the volume are bids and buys respectively
-    if bid_ratio > 0.6 or buy_ratio > 0.6 and final_action == 'buy' and final_confidence > 0.5:
+    if bid_ratio > 0.65 or buy_ratio > 0.65 and final_action == 'buy' and final_confidence < 0.5:
         logger.info("Final decision: BUY - bid and buy volumes are both above 55%")
         return 'buy'
     elif bid_ratio < 0.3 and buy_ratio < 0.3 and final_action == 'sell': #and final_confidence > 0.75:
@@ -186,6 +186,8 @@ async def get_balance(currency):
         return 0
 
 async def place_market_order(pair, side, amount):
+    current_price = await get_current_price(pair)
+    needPrice = current_price * (1 + settings.take_profit_percentage)
     if amount <= 0:
         logger.error(f"Invalid amount for {side} order: {amount}")
         return None
@@ -195,7 +197,7 @@ async def place_market_order(pair, side, amount):
         elif side == 'sell':
             order = await exchange.create_market_sell_order(pair, amount)
         logger.info(f"Market {side} order placed for {pair}: {amount} units at market price.")
-        await send_telegram_message(f"Market {side} order placed for {pair}: {amount} units at market price.")
+        await send_telegram_message(f"Market {side} order placed for {pair}: {amount} units at market price.\ncurrent: {current_price}\nneed: {needPrice}")
         return order
     except Exception as e:
         logger.error(f"An error occurred placing a {side} order for {pair}: {e}")
@@ -236,7 +238,7 @@ async def get_desired_tradeable_pairs():
         logger.error(f"Error loading markets: {e}")
         return []
 
-async def get_current_price(pair, retries=3, delay=5):
+async def get_current_price(pair, retries=100, delay=10):
     for attempt in range(retries):
         try:
             ticker = await exchange.fetch_ticker(pair)
@@ -389,9 +391,10 @@ async def advanced_trade():
                                     await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
                                     break
                                 elif current_price >= buy_price * (1 + settings.take_profit_percentage):
+                                    needPrice = buy_price * (1 + settings.take_profit_percentage)
                                     logger.info(f"Take-profit triggered for {pair} at {current_price}")
                                     await convert_to_usdt(pair)
-                                    await send_telegram_message(f"Take-profit triggered for {pair} at {current_price}.")
+                                    await send_telegram_message(f"BUY: {pair} at {current_price}.\nBuy-price: {buy_price}\nNeedPrice: {needPrice}")
                                     break
                                 await asyncio.sleep(60)  # Check every minute
                     elif final_action == 'sell':
