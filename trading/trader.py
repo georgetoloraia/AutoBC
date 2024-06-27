@@ -243,7 +243,7 @@ async def get_current_price(pair, retries=100, delay=10):
         try:
             ticker = await exchange.fetch_ticker(pair)
             current_price = ticker['last']
-            logger.info(f"Current market price for {pair}: {current_price}")
+            # logger.info(f"Current market price for {pair}: {current_price}")
             return current_price
         except Exception as e:
             logger.error(f"Error fetching current price for {pair}: {e}")
@@ -382,10 +382,11 @@ async def advanced_trade():
                             # Monitor position for stop-loss or take-profit
                             while True:
                                 current_price = await get_current_price(pair)
+                                need_sell = buy_price * (1 - settings.stop_loss_percentage)
                                 if current_price is None:
                                     logger.error("Failed to fetch current price during monitoring.")
                                     break
-                                if current_price <= buy_price * (1 - settings.stop_loss_percentage):
+                                if current_price <= need_sell: #buy_price * (1 - settings.stop_loss_percentage):
                                     logger.info(f"Stop-loss triggered for {pair} at {current_price}")
                                     await convert_to_usdt(pair)
                                     await send_telegram_message(f"Stop-loss triggered for {pair} at {current_price}.")
@@ -398,6 +399,8 @@ async def advanced_trade():
                                 #     break
                                 if current_price > buy_price:
                                     buy_price = current_price
+
+                                logger.info(f"Current market price for {pair}: {current_price} || Need Sell: {need_sell} || Buy price is: {buy_price}")
                                     
                                 await asyncio.sleep(60)  # Check every minute
                     elif final_action == 'sell':
