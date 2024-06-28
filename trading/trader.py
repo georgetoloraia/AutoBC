@@ -379,10 +379,10 @@ async def advanced_trade():
                         buy_order = await place_market_order(pair, 'buy', amount_to_buy)
                         if buy_order:
                             buy_price = await get_current_price(pair)
+                            need_sell = buy_price * (1 - settings.stop_loss_percentage)
                             # Monitor position for stop-loss or take-profit
                             while True:
                                 current_price = await get_current_price(pair)
-                                need_sell = buy_price * (1 - settings.stop_loss_percentage)
                                 if current_price is None:
                                     logger.error("Failed to fetch current price during monitoring.")
                                     break
@@ -399,6 +399,7 @@ async def advanced_trade():
                                 #     break
                                 if current_price > buy_price:
                                     buy_price = current_price
+                                    need_sell = round(need_sell - 0.001)
 
                                 logger.info(f"Current market price for {pair}: {current_price} || Need Sell: {need_sell} || Buy price is: {buy_price}")
                                     
