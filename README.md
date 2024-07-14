@@ -23,7 +23,7 @@ This project implements an advanced trading bot using Python. The bot connects t
 
 ## Project Structure
 
-```plaintext
+```r
 AutoBC/
 ├── bot.py                 # Main script to run the trading bot
 ├── config/
