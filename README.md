@@ -12,11 +12,12 @@
 
 This project implements an advanced trading bot using Python. The bot connects to the Binance exchange, evaluates trading signals based on various technical indicators, and executes trades accordingly. It also sends notifications about trading actions and errors to a specified Telegram chat.
 
-# 🔴 Live Terminal Session
+# 🔴 Facebook Live Streaming Session
 
 <div align="center">
-  <p>
-    <a href="https://tmate.io/t/jLj5SQkNEDMdJjR6fY3fjgwqc" target="_blank" style="text-decoration:none;">
+  <p> 
+    <a href="https://www.facebook.com/live/producer/641238978327747/" target="_blank" 
+    style="text-decoration:none;">
       <strong style="font-size:1.5em;">Click Here to Join "AutoBC" Live Terminal</strong>
     </a>
   </p>

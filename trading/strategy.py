@@ -56,6 +56,9 @@ def simplified_evaluate_trading_signals(data):
             signals[timeframe] = ('sell', sell_confidence)
 
     if buy_signals_count >= 2:
+        for tf in signals:
+            if tf in signals and signals[tf][0] == 'sell':
+                continue
         signals[timeframe] = ('buy', buy_confidence)
 
     return signals
