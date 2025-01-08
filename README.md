@@ -15,10 +15,17 @@ This project implements an advanced trading bot using Python. The bot connects t
 # Live Using tmate
 <div align='center'>
 https://tmate.io/t/jLj5SQkNEDMdJjR6fY3fjgwqc
-<video controls width="250">
-  <source src="https://tmate.io/t/jLj5SQkNEDMdJjR6fY3fjgwqc" type="video/webm" />
-</video>
 </div>
+
+<div align="center">
+  <h2>Live Terminal Session</h2>
+  <p>
+    <a href="https://tmate.io/t/jLj5SQkNEDMdJjR6fY3fjgwqc" target="_blank">
+      Click Here to Join My Live Terminal
+    </a>
+  </p>
+</div>
+
 
 ## Features
 
