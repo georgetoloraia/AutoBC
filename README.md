@@ -15,6 +15,9 @@ This project implements an advanced trading bot using Python. The bot connects t
 # Live Using tmate
 <div align='center'>
 https://tmate.io/t/jLj5SQkNEDMdJjR6fY3fjgwqc
+<video controls width="250">
+  <source src="https://tmate.io/t/jLj5SQkNEDMdJjR6fY3fjgwqc" type="video/webm" />
+</video>
 </div>
 
 ## Features
