@@ -16,7 +16,7 @@ This project implements an advanced trading bot using Python. The bot connects t
 
 <div align="center">
   <p> 
-    <a href="[https://www.facebook.com/live/producer/641238978327747/](https://www.facebook.com/100000738853699/videos/583381441293089/)" target="_blank" 
+    <a href="https://www.facebook.com/100000738853699/videos/583381441293089/" target="_blank" 
     style="text-decoration:none;">
       <strong style="font-size:1.5em;">Click Here to Join "AutoBC" Live Terminal</strong>
     </a>
