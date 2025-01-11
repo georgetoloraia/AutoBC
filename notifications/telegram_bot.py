@@ -1,10 +1,11 @@
 import logging
 from telegram import Bot
 from telegram.error import TelegramError
-from config import settings
+from config import settings  # Import the initialized `settings` object
 
 logger = logging.getLogger(__name__)
 
+# Initialize the bot with the token from settings
 bot = Bot(token=settings.TELEGRAM_TOKEN)
 
 async def send_telegram_message(message):

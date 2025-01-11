@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import ccxt.async_support as ccxt
-from config import settings
+# from config import settings
 from trading.trader import advanced_trade, close_exchange
 
 # Setup logging

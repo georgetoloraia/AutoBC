@@ -14,21 +14,22 @@ quote_currency = False
 initial_investment = 5.0  # investment amount | Modifi if need
 rsi_period = 14  # User's RSI period
 commission_rate = 0.05  #| Modifi if need
-stop_loss_percentage = 0.02  # | Modifi if need
-take_profit_percentage = 0.015  # | Modifi if need
+stop_loss_percentage = 3      # first test | Modifi if need
+take_profit_percentage = 2    # first test | Modifi if need
 
 DESIRED_COINS = ["1000SATS/USDT",
-                 "SOL/USDT",
-                 "LINK/USDT",
-                 "FTM/USDT",
-                 "AUDIO/USDT",
-                 "IO/USDT",
-                 "BB/USDT",
                  "NOT/USDT",
                  "COMBO/USDT",
                  "PEOPLE/USDT",
                  "PEPE/USDT",
-                 "BAKE/USDT",
+                 "BTC/USDT"
+                 ]
+
+
+
+# saved curency
+'''
+"BAKE/USDT",
                  "COS/USDT",
                  "XAI/USDT",
                  "IMX/USDT",
@@ -37,4 +38,10 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "MBL/USDT",
                  "AERGO/USDT",
                  "ZK/USDT",
-                 ]
+                 "SOL/USDT",
+                 "LINK/USDT",
+                 "FTM/USDT",
+                 "AUDIO/USDT",
+                 "IO/USDT",
+                 "BB/USDT",
+'''
