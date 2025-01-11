@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 def simplified_evaluate_trading_signals(data):
     signals = {}
-    timeframe_to_check = ['1m', '3m', '5m', '15m']
+    timeframe_to_check = ['3m', '5m', '15m', '1h']
 
     buy_signals_count = 0
 
