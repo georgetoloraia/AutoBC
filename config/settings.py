@@ -27,34 +27,6 @@ quote_currency = False  # If true, trade all pairs with the quote currency (e.g.
 INITIAL_INVESTMENT = 5.0  # USD
 STOP_LOSS_PERCENTAGE = 0.02  # 2%
 TAKE_PROFIT_PERCENTAGE = 0.05  # Initial take-profit percentage (5%)
-DESIRED_COINS = ["BTC/USDT", "ETH/USDT", "PEPE/USDT"]
-
-# Dynamic Profit-Taking Parameters
-PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
-MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
-
-
-
-
-
-
-'''
-# Load environment variables from .env file
-load_dotenv()
-
-API_KEY = os.getenv('API_KEY')
-SECRET = os.getenv('SECRET')
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
-# quote_currency = 'USDT'
-quote_currency = False
-initial_investment = 5.0  # investment amount | Modifi if need
-rsi_period = 14  # User's RSI period
-commission_rate = 0.05  #| Modifi if need
-stop_loss_percentage = 3      # first test | Modifi if need
-take_profit_percentage = 2    # first test | Modifi if need
-
 DESIRED_COINS = ["1000SATS/USDT",
                  "NOT/USDT",
                  "COMBO/USDT",
@@ -63,19 +35,7 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "BTC/USDT"
                  ]
 
+# Dynamic Profit-Taking Parameters
+PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
+MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 
-
-# saved curency
-'''
-"BAKE/USDT",
-                 "COS/USDT",
-                 "XAI/USDT",
-                 "IMX/USDT",
-                 "FLOKI/USDT",
-                 "STMX/USDT",
-                 "MBL/USDT",
-                 "AERGO/USDT",
-                 "ZK/USDT",
-                 ]
-
-'''
