@@ -1,17 +1,12 @@
 import logging
 from telegram import Bot
 from telegram.error import TelegramError
-from config import settings
+from config import settings  # Import the initialized `settings` object
 
 logger = logging.getLogger(__name__)
 
-# Initialize Telegram Bot
-try:
-    bot = Bot(token=settings.TELEGRAM_TOKEN)
-    logger.info("Telegram bot initialized successfully.")
-except TelegramError as e:
-    logger.error(f"Failed to initialize Telegram bot: {e}")
-    bot = None  # Ensure bot is None if initialization fails
+# Initialize the bot with the token from settings
+bot = Bot(token=settings.TELEGRAM_TOKEN)
 
 async def send_telegram_message(message):
     """

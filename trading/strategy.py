@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 def simplified_evaluate_trading_signals(data):
     signals = {}
-    timeframe_to_check = ['1m', '5m', '1h', '1d']
+    timeframe_to_check = ['3m', '5m', '15m', '1h']
 
     buy_signals_count = 0
 
@@ -56,6 +56,9 @@ def simplified_evaluate_trading_signals(data):
             signals[timeframe] = ('sell', sell_confidence)
 
     if buy_signals_count >= 2:
+        for tf in signals:
+            if tf in signals and signals[tf][0] == 'sell':
+                continue
         signals[timeframe] = ('buy', buy_confidence)
 
     return signals
