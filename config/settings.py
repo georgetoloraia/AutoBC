@@ -12,12 +12,6 @@ SECRET = os.getenv('SECRET')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-# Log for debugging
-# print(f"API_KEY: {API_KEY}")
-# print(f"SECRET: {SECRET}")
-# print(f"TELEGRAM_TOKEN: {TELEGRAM_TOKEN}")
-# print(f"TELEGRAM_CHAT_ID: {TELEGRAM_CHAT_ID}")
-
 # Trading Parameters
 USE_ML = False  # Disabled for now, as you're not using ChatGPT or ML
 ML_MODEL_PATH = "data/ml_model.pkl"
@@ -35,34 +29,70 @@ MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 TIMEFRAMES = ['1', '3m', '5m', '15m', '30m', '1h']
 BUY_CONFIDENCE_THRESHOLD = 0.8
 SELL_CONFIDENCE_THRESHOLD = 0.8
+
 TIMEFRAME_WEIGHTS = {
-    '1m': 0.6,
-    '3m': 0.6,
-    '5m': 0.5,
-    '15m': 0.4,
-    '30m': 0.9,
-    '1h': 1.0
+    '1m': 0.3,   # Short-term, very noisy, low weight
+    '3m': 0.5,   # Slightly more reliable than 1m
+    '5m': 0.6,   # Common timeframe for scalping
+    '15m': 0.8,  # Balanced between short-term noise and trend reliability
+    '30m': 1.0,  # Stronger signals, suitable for intraday trading
+    '1h': 1.2    # Reliable for intraday and swing trading
 }
+'''
+This wait
+    '4h': 1.5,   # Suitable for swing trading and longer-term trends
+    '1d': 2.0    # Best for confirming overall market direction
+'''
+
 INDICATOR_WEIGHTS = {
-    'close < lower_band': 0.2,
-    'rsi < 30': 0.2,
-    'macd > macd_signal': 0.2,
-    'adx > 30 and +DI > -DI': 0.2,
-    'close > vwap': 0.1,
-    'mfi < 20': 0.1
+    # Bollinger Bands
+    'close < lower_band': 0.2,   # Price below lower Bollinger Band (oversold)
+    'close > upper_band': 0.2,   # Price above upper Bollinger Band (overbought)
+
+    # RSI
+    'rsi < 30': 0.2,             # RSI below 30 (oversold)
+    'rsi > 70': 0.2,             # RSI above 70 (overbought)
+
+    # MACD
+    'macd > macd_signal': 0.25,  # MACD bullish crossover
+    'macd < macd_signal': 0.25,  # MACD bearish crossover
+
+    # ADX and Directional Indicators
+    'adx > 30 and +DI > -DI': 0.25,  # Strong trend with bullish directional movement
+    'adx > 25 and -DI > +DI': 0.25,  # Strong trend with bearish directional movement
+
+    # Money Flow Index (MFI)
+    'mfi < 20': 0.15,            # MFI indicating oversold
+    'mfi > 80': 0.15,            # MFI indicating overbought
+
+    # VWAP
+    'close > vwap': 0.1,         # Price above VWAP (bullish)
+    'close < vwap': 0.1,         # Price below VWAP (bearish)
+
+    # Average True Range (ATR)
+    'atr > atr.shift(1)': 0.1,   # Increasing volatility
+
+    # OBV (On-Balance Volume)
+    'obv > obv.shift(1)': 0.1,   # Positive volume flow (bullish)
+    'obv < obv.shift(1)': 0.1    # Negative volume flow (bearish)
 }
+
 
 
 DESIRED_COINS = [
-    "BTC/USDT",   # Bitcoin - High liquidity, low volatility
-    "ETH/USDT",   # Ethereum - High liquidity, moderate volatility
-    "BNB/USDT",   # Binance Coin - High liquidity, suitable for Binance traders
-    "SOL/USDT",   # Solana - Moderate volatility, growing ecosystem
-    "ADA/USDT",   # Cardano - Moderate volatility, strong community
-    "MATIC/USDT", # Polygon - Popular for Layer 2 solutions
-    "LTC/USDT",   # Litecoin - Stable price action, good for trend following
-    "XRP/USDT",   # Ripple - High liquidity, speculative moves
-    "DOT/USDT",   # Polkadot - Moderate volatility, trend-respecting
-    "AVAX/USDT",  # Avalanche - High potential for trading
-    "ATOM/USDT"   # Cosmos - Well-known for consistent movements
+    "BTC/USDT",   # Bitcoin - High liquidity, relatively stable
+    "ETH/USDT",   # Ethereum - High liquidity, good for consistent trends
+    "BNB/USDT",   # Binance Coin - High liquidity, suitable for Binance ecosystem traders
+    "SOL/USDT",   # Solana - Increasing adoption, moderate volatility
+    "XRP/USDT",   # Ripple - High liquidity, speculative and volatile
+    "ADA/USDT",   # Cardano - Strong community support and steady price action
+    "DOGE/USDT",  # Dogecoin - Popular and volatile, speculative trading
+    "PEPE/USDT",  # PEPE - High speculation and volatility
+    "PROM/USDT",  # Prom - Top gainer, high momentum
+    "STG/USDT",   # Stargate - Moderate liquidity, potential short-term momentum
+    "PNUT/USDT",  # PNUT - Strong gain potential in short-term trends
+    "XVS/USDT",   # Venus - Trending with significant price change
+    "KNC/USDT",   # Kyber Network - Moderate momentum, short-term opportunities
+    "TFUEL/USDT", # Theta Fuel - Significant short-term price changes
+    "MATIC/USDT", # Polygon - Stable upward trends with moderate volatility
 ]

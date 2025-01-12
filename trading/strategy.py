@@ -1,7 +1,7 @@
 import logging
 from indicators.technical_indicators import calculate_indicators
 from config.settings import TIMEFRAMES, TIMEFRAME_WEIGHTS, INDICATOR_WEIGHTS, BUY_CONFIDENCE_THRESHOLD, SELL_CONFIDENCE_THRESHOLD
-
+import pandas as pd
 logger = logging.getLogger(__name__)
 
 def simplified_evaluate_trading_signals(data):
@@ -13,8 +13,7 @@ def simplified_evaluate_trading_signals(data):
                      with OHLCV data.
 
     Returns:
-        str or None: Returns "buy" if aggregate buy confidence is higher, "sell" if aggregate sell confidence is higher,
-                     "wait" if market shows indecision, or None if no valid signals are found.
+        str: "buy", "sell", "wait" based on aggregated confidence scores.
     """
     aggregate_buy_confidence = 0
     aggregate_sell_confidence = 0
@@ -36,6 +35,11 @@ def simplified_evaluate_trading_signals(data):
             latest = df.iloc[-1]
         except Exception as e:
             logger.error(f"Error calculating indicators for {timeframe}: {e}")
+            continue
+
+        # Validate indicators
+        if not validate_indicators(latest):
+            logger.warning(f"Missing or invalid indicators for {timeframe}. Skipping.")
             continue
 
         # Evaluate buy and sell conditions
@@ -60,11 +64,14 @@ def simplified_evaluate_trading_signals(data):
     # Log detailed insights
     log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence)
 
+    # Normalize weights
+    total_weight = sum(TIMEFRAME_WEIGHTS.values())
+
     # Determine final signal
     return determine_final_signal(
         aggregate_buy_confidence,
         aggregate_sell_confidence,
-        sum(TIMEFRAME_WEIGHTS.values()),
+        total_weight,
         BUY_CONFIDENCE_THRESHOLD,
         SELL_CONFIDENCE_THRESHOLD
     )
@@ -86,17 +93,49 @@ def evaluate_conditions(latest, indicator_weights, buy=True):
     for condition, weight in indicator_weights.items():
         try:
             # Adjust condition logic for buy/sell
-            condition_logic = condition if buy else f"not ({condition})"
-            condition_met = eval(condition_logic, None, latest.to_dict())
-            if condition_met:
-                score += weight
-            else:
-                score -= weight
+            condition_met = eval(condition, None, latest.to_dict()) if buy else not eval(condition, None, latest.to_dict())
+            logger.debug(f"Condition: {condition}, Met: {condition_met}, Weight: {weight}")
+            score += weight if condition_met else -weight
         except Exception as e:
             logger.error(f"Error evaluating condition '{condition}': {e}")
             continue
+    return max(0, min(score, 1))  # Clamp score between 0 and 1
 
-    return max(0, min(score, 1))  # Clamp confidence score between 0 and 1
+
+def evaluate_condition(condition, data):
+    """
+    Evaluate a single condition using the latest data.
+
+    Parameters:
+        condition (str): Condition as a string (e.g., "close < lower_band").
+        data (pd.Series): Latest row of indicator data.
+
+    Returns:
+        bool: Whether the condition is met.
+    """
+    try:
+        return eval(condition, None, data.to_dict())
+    except Exception as e:
+        logger.error(f"Error evaluating condition '{condition}': {e}")
+        return False
+
+
+def validate_indicators(latest):
+    """
+    Validate that all required indicators are present and non-NaN.
+
+    Parameters:
+        latest (pd.Series): Latest row of indicator data.
+
+    Returns:
+        bool: True if all indicators are valid, False otherwise.
+    """
+    required_columns = ['close', 'lower_band', 'rsi', 'macd', 'macd_signal', 'adx', 'plus_DI', 'minus_DI', 'vwap', 'mfi']
+    for col in required_columns:
+        if col not in latest or pd.isna(latest[col]):
+            logger.warning(f"Missing or NaN value for indicator: {col}")
+            return False
+    return True
 
 
 def log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence):
@@ -128,7 +167,7 @@ def determine_final_signal(aggregate_buy, aggregate_sell, total_weight, buy_thre
         sell_threshold (float): Sell confidence threshold.
 
     Returns:
-        str or None: "buy", "sell", "wait", or None.
+        str: "buy", "sell", or "wait".
     """
     avg_buy_confidence = aggregate_buy / total_weight
     avg_sell_confidence = aggregate_sell / total_weight
@@ -139,9 +178,6 @@ def determine_final_signal(aggregate_buy, aggregate_sell, total_weight, buy_thre
     elif avg_sell_confidence >= sell_threshold:
         logger.info(f"Sell signal triggered with average sell confidence: {avg_sell_confidence:.2f}")
         return "sell"
-    # elif abs(aggregate_buy - aggregate_sell) < 0.1:  # Example threshold for indecision
-    #     logger.info("Market is indecisive. Returning 'wait' signal.")
-    #     return "wait"
 
-    logger.info("No valid signals found.")
+    logger.info("Market is indecisive. Returning 'wait' signal.")
     return "wait"
