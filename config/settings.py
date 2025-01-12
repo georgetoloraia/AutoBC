@@ -27,6 +27,11 @@ quote_currency = False  # If true, trade all pairs with the quote currency (e.g.
 INITIAL_INVESTMENT = 5.0  # USD
 STOP_LOSS_PERCENTAGE = 0.02  # 2%
 TAKE_PROFIT_PERCENTAGE = 0.05  # Initial take-profit percentage (5%)
+
+# ---------------------
+BUY_CONFIDENCE_THRESHOLD = 0.6
+SELL_CONFIDENCE_THRESHOLD = 0.6
+
 DESIRED_COINS = ["1000SATS/USDT",
                  "NOT/USDT",
                  "COMBO/USDT",
@@ -47,4 +52,6 @@ DESIRED_COINS = ["1000SATS/USDT",
 # Dynamic Profit-Taking Parameters
 PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
 MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
+
+TIMEFRAMES = ['1m', '3m', '5m', '15m', '30m', '1h']
 
