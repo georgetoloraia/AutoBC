@@ -1,6 +1,6 @@
 import logging
 from indicators.technical_indicators import calculate_indicators
-from config.settings import TIMEFRAMES, BUY_CONFIDENCE_THRESHOLD, SELL_CONFIDENCE_THRESHOLD, TIMEFRAME_WEIGHTS, INDICATOR_WEIGHTS
+from config.settings import TIMEFRAMES, TIMEFRAME_WEIGHTS, INDICATOR_WEIGHTS, BUY_CONFIDENCE_THRESHOLD, SELL_CONFIDENCE_THRESHOLD
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ def simplified_evaluate_trading_signals(data):
         buy_confidence = evaluate_conditions(latest, INDICATOR_WEIGHTS, buy=True)
         sell_confidence = evaluate_conditions(latest, INDICATOR_WEIGHTS, buy=False)
 
-        # Adjust confidences with timeframe weight
+        # Apply timeframe weights
         timeframe_weight = TIMEFRAME_WEIGHTS.get(timeframe, 1.0)
         weighted_buy_confidence = buy_confidence * timeframe_weight
         weighted_sell_confidence = sell_confidence * timeframe_weight
@@ -64,7 +64,7 @@ def simplified_evaluate_trading_signals(data):
     return determine_final_signal(
         aggregate_buy_confidence,
         aggregate_sell_confidence,
-        len(TIMEFRAMES),
+        sum(TIMEFRAME_WEIGHTS.values()),
         BUY_CONFIDENCE_THRESHOLD,
         SELL_CONFIDENCE_THRESHOLD
     )
@@ -116,22 +116,22 @@ def log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confide
     logger.info(f"Aggregate Sell Confidence: {aggregate_sell_confidence:.2f}")
 
 
-def determine_final_signal(aggregate_buy, aggregate_sell, num_timeframes, buy_threshold, sell_threshold):
+def determine_final_signal(aggregate_buy, aggregate_sell, total_weight, buy_threshold, sell_threshold):
     """
     Determine the final signal based on aggregated confidences.
 
     Parameters:
         aggregate_buy (float): Aggregate buy confidence.
         aggregate_sell (float): Aggregate sell confidence.
-        num_timeframes (int): Total number of timeframes.
+        total_weight (float): Total weight of timeframes.
         buy_threshold (float): Buy confidence threshold.
         sell_threshold (float): Sell confidence threshold.
 
     Returns:
         str or None: "buy", "sell", "wait", or None.
     """
-    avg_buy_confidence = aggregate_buy / num_timeframes
-    avg_sell_confidence = aggregate_sell / num_timeframes
+    avg_buy_confidence = aggregate_buy / total_weight
+    avg_sell_confidence = aggregate_sell / total_weight
 
     if avg_buy_confidence >= buy_threshold:
         logger.info(f"Buy signal triggered with average buy confidence: {avg_buy_confidence:.2f}")
@@ -144,4 +144,4 @@ def determine_final_signal(aggregate_buy, aggregate_sell, num_timeframes, buy_th
     #     return "wait"
 
     logger.info("No valid signals found.")
-    return 'wait'
+    return "wait"

@@ -33,13 +33,13 @@ PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
 MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 
 TIMEFRAMES = ['1', '3m', '5m', '15m', '30m', '1h']
-BUY_CONFIDENCE_THRESHOLD = 0.6
-SELL_CONFIDENCE_THRESHOLD = 0.6
+BUY_CONFIDENCE_THRESHOLD = 0.8
+SELL_CONFIDENCE_THRESHOLD = 0.8
 TIMEFRAME_WEIGHTS = {
-    '1m': 0.5,
+    '1m': 0.6,
     '3m': 0.6,
-    '5m': 0.7,
-    '15m': 0.8,
+    '5m': 0.5,
+    '15m': 0.4,
     '30m': 0.9,
     '1h': 1.0
 }
@@ -53,15 +53,16 @@ INDICATOR_WEIGHTS = {
 }
 
 
-DESIRED_COINS = ["1000SATS/USDT",
-                 "NOT/USDT",
-                 "COMBO/USDT",
-                 "PEOPLE/USDT",
-                 "PEPE/USDT",
-                 "COOKIE/USDT",
-                 "MBL/USDT",
-                 "AI/USDT",
-                 "LTO/USDT",
-                 "HARD/USDT",
-                 "BTC/USDT"
-                 ]
+DESIRED_COINS = [
+    "BTC/USDT",   # Bitcoin - High liquidity, low volatility
+    "ETH/USDT",   # Ethereum - High liquidity, moderate volatility
+    "BNB/USDT",   # Binance Coin - High liquidity, suitable for Binance traders
+    "SOL/USDT",   # Solana - Moderate volatility, growing ecosystem
+    "ADA/USDT",   # Cardano - Moderate volatility, strong community
+    "MATIC/USDT", # Polygon - Popular for Layer 2 solutions
+    "LTC/USDT",   # Litecoin - Stable price action, good for trend following
+    "XRP/USDT",   # Ripple - High liquidity, speculative moves
+    "DOT/USDT",   # Polkadot - Moderate volatility, trend-respecting
+    "AVAX/USDT",  # Avalanche - High potential for trading
+    "ATOM/USDT"   # Cosmos - Well-known for consistent movements
+]
