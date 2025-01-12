@@ -28,9 +28,30 @@ INITIAL_INVESTMENT = 5.0  # USD
 STOP_LOSS_PERCENTAGE = 0.02  # 2%
 TAKE_PROFIT_PERCENTAGE = 0.05  # Initial take-profit percentage (5%)
 
-# ---------------------
+# Dynamic Profit-Taking Parameters
+PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
+MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
+
+TIMEFRAMES = ['1', '3m', '5m', '15m', '30m', '1h']
 BUY_CONFIDENCE_THRESHOLD = 0.6
 SELL_CONFIDENCE_THRESHOLD = 0.6
+TIMEFRAME_WEIGHTS = {
+    '1m': 0.5,
+    '3m': 0.6,
+    '5m': 0.7,
+    '15m': 0.8,
+    '30m': 0.9,
+    '1h': 1.0
+}
+INDICATOR_WEIGHTS = {
+    'close < lower_band': 0.2,
+    'rsi < 30': 0.2,
+    'macd > macd_signal': 0.2,
+    'adx > 30 and +DI > -DI': 0.2,
+    'close > vwap': 0.1,
+    'mfi < 20': 0.1
+}
+
 
 DESIRED_COINS = ["1000SATS/USDT",
                  "NOT/USDT",
@@ -48,10 +69,3 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "RAY/USDT",
                  "HARD/USDT"
                  ]
-
-# Dynamic Profit-Taking Parameters
-PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
-MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
-
-TIMEFRAMES = ['1m', '3m', '5m', '15m', '30m', '1h']
-

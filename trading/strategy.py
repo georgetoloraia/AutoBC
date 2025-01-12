@@ -1,6 +1,6 @@
 import logging
 from indicators.technical_indicators import calculate_indicators
-from config.settings import TIMEFRAMES, BUY_CONFIDENCE_THRESHOLD, SELL_CONFIDENCE_THRESHOLD
+from config.settings import TIMEFRAMES, BUY_CONFIDENCE_THRESHOLD, SELL_CONFIDENCE_THRESHOLD, TIMEFRAME_WEIGHTS, INDICATOR_WEIGHTS
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ def simplified_evaluate_trading_signals(data):
 
     Returns:
         str or None: Returns "buy" if aggregate buy confidence is higher, "sell" if aggregate sell confidence is higher,
-                     or None if no valid signals are found.
+                     "wait" if market shows indecision, or None if no valid signals are found.
     """
     aggregate_buy_confidence = 0
     aggregate_sell_confidence = 0
@@ -38,49 +38,110 @@ def simplified_evaluate_trading_signals(data):
             logger.error(f"Error calculating indicators for {timeframe}: {e}")
             continue
 
-        # Define buy and sell conditions
-        buy_conditions = [
-            latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
-            latest['rsi'] < 30,  # RSI below 30 (oversold)
-            latest['macd'] > latest['macd_signal'],  # MACD bullish crossover
-            latest['adx'] > 30 and latest['+DI'] > latest['-DI'],  # Strong ADX trend
-            latest['close'] > latest['vwap'],  # Price above VWAP
-            latest['mfi'] < 20  # Money Flow Index indicating oversold
-        ]
+        # Evaluate buy and sell conditions
+        buy_confidence = evaluate_conditions(latest, INDICATOR_WEIGHTS, buy=True)
+        sell_confidence = evaluate_conditions(latest, INDICATOR_WEIGHTS, buy=False)
 
-        sell_conditions = [
-            latest['close'] > latest['upper_band'],  # Price above upper Bollinger Band
-            latest['rsi'] > 70,  # RSI above 70 (overbought)
-            latest['macd'] < latest['macd_signal'],  # MACD bearish crossover
-            latest['adx'] > 25 and latest['-DI'] > latest['+DI'],  # Strong ADX trend
-            latest['close'] < latest['vwap'],  # Price below VWAP
-            latest['mfi'] > 80  # Money Flow Index indicating overbought
-        ]
-
-        # Calculate confidence scores
-        buy_confidence = sum([1 if cond else 0 for cond in buy_conditions]) / len(buy_conditions)
-        sell_confidence = sum([1 if cond else 0 for cond in sell_conditions]) / len(sell_conditions)
-        logger.debug(f"Timeframe: {timeframe}")
-        logger.debug(f"Buy Confidence: {buy_confidence:.2f}")
-        logger.debug(f"Sell Confidence: {sell_confidence:.2f}")
+        # Adjust confidences with timeframe weight
+        timeframe_weight = TIMEFRAME_WEIGHTS.get(timeframe, 1.0)
+        weighted_buy_confidence = buy_confidence * timeframe_weight
+        weighted_sell_confidence = sell_confidence * timeframe_weight
 
         # Aggregate confidences
-        aggregate_buy_confidence += buy_confidence
-        aggregate_sell_confidence += sell_confidence
+        aggregate_buy_confidence += weighted_buy_confidence
+        aggregate_sell_confidence += weighted_sell_confidence
 
-        # Store signals for logging/debugging
+        # Store signals for debugging
         signals[timeframe] = {
-            'buy_confidence': buy_confidence,
-            'sell_confidence': sell_confidence
+            'buy_confidence': weighted_buy_confidence,
+            'sell_confidence': weighted_sell_confidence
         }
 
+    # Log detailed insights
+    log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence)
+
     # Determine final signal
-    if aggregate_buy_confidence > aggregate_sell_confidence and aggregate_buy_confidence / len(TIMEFRAMES) >= BUY_CONFIDENCE_THRESHOLD:
-        logger.info(f"Buy signal triggered with aggregate buy confidence: {aggregate_buy_confidence:.2f}")
+    return determine_final_signal(
+        aggregate_buy_confidence,
+        aggregate_sell_confidence,
+        len(TIMEFRAMES),
+        BUY_CONFIDENCE_THRESHOLD,
+        SELL_CONFIDENCE_THRESHOLD
+    )
+
+
+def evaluate_conditions(latest, indicator_weights, buy=True):
+    """
+    Evaluate conditions for buy or sell signals.
+
+    Parameters:
+        latest (pd.Series): Latest row of indicator data.
+        indicator_weights (dict): Dictionary of conditions and weights.
+        buy (bool): If True, evaluates buy conditions; otherwise, evaluates sell conditions.
+
+    Returns:
+        float: Confidence score based on the conditions.
+    """
+    score = 0
+    for condition, weight in indicator_weights.items():
+        try:
+            # Adjust condition logic for buy/sell
+            condition_logic = condition if buy else f"not ({condition})"
+            condition_met = eval(condition_logic, None, latest.to_dict())
+            if condition_met:
+                score += weight
+            else:
+                score -= weight
+        except Exception as e:
+            logger.error(f"Error evaluating condition '{condition}': {e}")
+            continue
+
+    return max(0, min(score, 1))  # Clamp confidence score between 0 and 1
+
+
+def log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence):
+    """
+    Log detailed signal confidence for each timeframe and aggregate results.
+
+    Parameters:
+        signals (dict): Signals with confidence scores per timeframe.
+        aggregate_buy_confidence (float): Aggregate buy confidence.
+        aggregate_sell_confidence (float): Aggregate sell confidence.
+    """
+    for timeframe, details in signals.items():
+        logger.debug(f"Timeframe: {timeframe}, "
+                     f"Buy Confidence: {details['buy_confidence']:.2f}, "
+                     f"Sell Confidence: {details['sell_confidence']:.2f}")
+    logger.info(f"Aggregate Buy Confidence: {aggregate_buy_confidence:.2f}")
+    logger.info(f"Aggregate Sell Confidence: {aggregate_sell_confidence:.2f}")
+
+
+def determine_final_signal(aggregate_buy, aggregate_sell, num_timeframes, buy_threshold, sell_threshold):
+    """
+    Determine the final signal based on aggregated confidences.
+
+    Parameters:
+        aggregate_buy (float): Aggregate buy confidence.
+        aggregate_sell (float): Aggregate sell confidence.
+        num_timeframes (int): Total number of timeframes.
+        buy_threshold (float): Buy confidence threshold.
+        sell_threshold (float): Sell confidence threshold.
+
+    Returns:
+        str or None: "buy", "sell", "wait", or None.
+    """
+    avg_buy_confidence = aggregate_buy / num_timeframes
+    avg_sell_confidence = aggregate_sell / num_timeframes
+
+    if avg_buy_confidence >= buy_threshold:
+        logger.info(f"Buy signal triggered with average buy confidence: {avg_buy_confidence:.2f}")
         return "buy"
-    elif aggregate_sell_confidence > aggregate_buy_confidence and aggregate_sell_confidence / len(TIMEFRAMES) >= SELL_CONFIDENCE_THRESHOLD:
-        logger.info(f"Sell signal triggered with aggregate sell confidence: {aggregate_sell_confidence:.2f}")
+    elif avg_sell_confidence >= sell_threshold:
+        logger.info(f"Sell signal triggered with average sell confidence: {avg_sell_confidence:.2f}")
         return "sell"
+    elif abs(aggregate_buy - aggregate_sell) < 0.1:  # Example threshold for indecision
+        logger.info("Market is indecisive. Returning 'wait' signal.")
+        return "wait"
 
     logger.info("No valid signals found.")
-    return signals
+    return None

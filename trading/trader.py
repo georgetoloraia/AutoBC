@@ -204,9 +204,10 @@ async def advanced_trade():
                                 break
 
                             await asyncio.sleep(60)
+                print("Signal determined: 'Wait'")
 
-                elif 'sell' in trading_signals.values():
-                    continue
+                # elif 'sell' in trading_signals.values():
+                #     continue
                     # asset = pair.split('/')[0]
                     # asset_balance = await get_balance(asset)
                     # await place_market_order(pair, 'sell', asset_balance)
