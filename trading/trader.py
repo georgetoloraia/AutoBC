@@ -203,7 +203,7 @@ async def advanced_trade():
                                 await place_market_order(pair, 'sell', amount_to_buy)
                                 break
 
-                            await asyncio.sleep(30)
+                            await asyncio.sleep(60)
 
                 elif 'sell' in trading_signals.values():
                     continue

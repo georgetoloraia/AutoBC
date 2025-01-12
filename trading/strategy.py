@@ -60,7 +60,7 @@ def simplified_evaluate_trading_signals(data):
         # Calculate confidence scores
         buy_confidence = sum([1 if cond else 0 for cond in buy_conditions]) / len(buy_conditions)
         sell_confidence = sum([1 if cond else 0 for cond in sell_conditions]) / len(sell_conditions)
-        logger.debug(f"Timeframe: {timeframe}, Buy Confidence: {buy_confidence:.2f}, Sell Confidence: {sell_confidence:.2f}")
+        logger.debug(f"Timeframe: {timeframe}\nBuy Confidence: {buy_confidence:.2f}\nSell Confidence: {sell_confidence:.2f}\n")
 
         # Aggregate confidences
         aggregate_buy_confidence += buy_confidence
@@ -81,4 +81,4 @@ def simplified_evaluate_trading_signals(data):
         return "sell"
 
     logger.info("No valid signals found.")
-    return "Waiting"
+    return signals
