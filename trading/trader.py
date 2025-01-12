@@ -155,7 +155,7 @@ async def advanced_trade():
                 stop_loss_buffer = 0.02  # Adjust stop-loss to 2% below current price
                 buy_price = None  # Track the price at which the asset was bought
 
-                if 'buy' in trading_signals.values():
+                if 'buy' in trading_signals:
                     usdt_balance = await get_balance('USDT')
                     amount_to_buy = usdt_balance / order_book['asks'][0][0]
                     buy_order = await place_market_order(pair, 'buy', amount_to_buy)
