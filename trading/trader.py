@@ -44,7 +44,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['3m', '5m', '15m', '1h'], limit=1000):
+async def fetch_historical_prices(pair, timeframes=['1m', '3m', '5m', '15m', '30m', '1h'], limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
@@ -206,14 +206,15 @@ async def advanced_trade():
                             await asyncio.sleep(30)
 
                 elif 'sell' in trading_signals.values():
-                    asset = pair.split('/')[0]
-                    asset_balance = await get_balance(asset)
-                    await place_market_order(pair, 'sell', asset_balance)
-                    logger.info(f"Sold {pair}")
+                    continue
+                    # asset = pair.split('/')[0]
+                    # asset_balance = await get_balance(asset)
+                    # await place_market_order(pair, 'sell', asset_balance)
+                    # logger.info(f"Sold {pair}")
 
-                await asyncio.sleep(2)
+                await asyncio.sleep(5)
 
-            await asyncio.sleep(90)
+            await asyncio.sleep(181)
         except Exception as e:
             logger.error(f"An error occurred during trading: {e}")
-            await asyncio.sleep(60)
+            await asyncio.sleep(61)
