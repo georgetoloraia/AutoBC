@@ -59,13 +59,9 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "PEOPLE/USDT",
                  "PEPE/USDT",
                  "COOKIE/USDT",
-                 "IQ/USDT",
-                 "D/USDT",
-                 "POND/USDT",
-                 "SUI/USDT",
                  "MBL/USDT",
                  "AI/USDT",
                  "LTO/USDT",
-                 "RAY/USDT",
-                 "HARD/USDT"
+                 "HARD/USDT",
+                 "BTC/USDT"
                  ]

@@ -139,9 +139,9 @@ def determine_final_signal(aggregate_buy, aggregate_sell, num_timeframes, buy_th
     elif avg_sell_confidence >= sell_threshold:
         logger.info(f"Sell signal triggered with average sell confidence: {avg_sell_confidence:.2f}")
         return "sell"
-    elif abs(aggregate_buy - aggregate_sell) < 0.1:  # Example threshold for indecision
-        logger.info("Market is indecisive. Returning 'wait' signal.")
-        return "wait"
+    # elif abs(aggregate_buy - aggregate_sell) < 0.1:  # Example threshold for indecision
+    #     logger.info("Market is indecisive. Returning 'wait' signal.")
+    #     return "wait"
 
     logger.info("No valid signals found.")
-    return None
+    return 'wait'
