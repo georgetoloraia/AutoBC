@@ -5,18 +5,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Exchange API Keys
-API_KEY = os.getenv('api_key')
-SECRET = os.getenv('secret')
+API_KEY = os.getenv('API_KEY')
+SECRET = os.getenv('SECRET')
 
 # Telegram API keys
-TELEGRAM_TOKEN = os.getenv('telegram_token')
-TELEGRAM_CHAT_ID = os.getenv('telegram_chat_id')
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 # Log for debugging
-print(f"API_KEY: {API_KEY}")
-print(f"SECRET: {SECRET}")
-print(f"TELEGRAM_TOKEN: {TELEGRAM_TOKEN}")
-print(f"TELEGRAM_CHAT_ID: {TELEGRAM_CHAT_ID}")
+# print(f"API_KEY: {API_KEY}")
+# print(f"SECRET: {SECRET}")
+# print(f"TELEGRAM_TOKEN: {TELEGRAM_TOKEN}")
+# print(f"TELEGRAM_CHAT_ID: {TELEGRAM_CHAT_ID}")
 
 # Trading Parameters
 USE_ML = False  # Disabled for now, as you're not using ChatGPT or ML
@@ -32,7 +32,16 @@ DESIRED_COINS = ["1000SATS/USDT",
                  "COMBO/USDT",
                  "PEOPLE/USDT",
                  "PEPE/USDT",
-                 "BTC/USDT"
+                 "COOKIE/USDT",
+                 "IQ/USDT",
+                 "D/USDT",
+                 "POND/USDT",
+                 "SUI/USDT",
+                 "MBL/USDT",
+                 "AI/USDT",
+                 "LTO/USDT",
+                 "RAY/USDT",
+                 "HARD/USDT"
                  ]
 
 # Dynamic Profit-Taking Parameters

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import ccxt.async_support as ccxt
-from config import settings  # Ensure this is uncommented if settings are used
+# from config import settings  # Ensure this is uncommented if settings are used
 from trading.trader import advanced_trade, close_exchange
 
 import os
