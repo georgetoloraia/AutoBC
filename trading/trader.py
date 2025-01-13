@@ -215,7 +215,7 @@ async def advanced_trade():
 
                 await asyncio.sleep(5)
 
-            await asyncio.sleep(181)
+            await asyncio.sleep(60)
         except Exception as e:
             logger.error(f"An error occurred during trading: {e}")
             await asyncio.sleep(61)

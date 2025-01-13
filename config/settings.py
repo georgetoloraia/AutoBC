@@ -80,7 +80,7 @@ INDICATOR_WEIGHTS = {
 
 
 
-DESIRED_COINS = [
+DESIRED_COINS_FALSE = [
     "BTC/USDT",   # Bitcoin - High liquidity, relatively stable
     "ETH/USDT",   # Ethereum - High liquidity, good for consistent trends
     "BNB/USDT",   # Binance Coin - High liquidity, suitable for Binance ecosystem traders
@@ -96,4 +96,20 @@ DESIRED_COINS = [
     "KNC/USDT",   # Kyber Network - Moderate momentum, short-term opportunities
     "TFUEL/USDT", # Theta Fuel - Significant short-term price changes
     "MATIC/USDT", # Polygon - Stable upward trends with moderate volatility
+]
+
+DESIRED_COINS = [
+    # High Liquidity and Stability
+    "BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT", "MATIC/USDT",
+
+    # Moderate Volatility
+    "SOL/USDT", "DOT/USDT", "AVAX/USDT", "ATOM/USDT", "LTC/USDT", "LINK/USDT", 
+    "NEAR/USDT", "ALGO/USDT",
+
+    # Speculative and High Volatility
+    "DOGE/USDT", "PEPE/USDT", "SHIB/USDT", "APT/USDT", "PROM/USDT", "RNDR/USDT", 
+    "ROSE/USDT", "STG/USDT",
+
+    # Momentum Plays
+    "GALA/USDT", "FTM/USDT", "SAND/USDT", "AXS/USDT", "IMX/USDT", "CFX/USDT"
 ]
