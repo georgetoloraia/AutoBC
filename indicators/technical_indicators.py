@@ -12,4 +12,8 @@ def calculate_indicators(df):
     df['obv'] = talib.OBV(df['close'], df['volume'])
     df['vwap'] = (df['close'] * df['volume']).cumsum() / df['volume'].cumsum()
     df['typical_price'] = talib.TYPPRICE(df['high'], df['low'], df['close'])
+
+     # Add shifted conditions at the dataframe level
+    df['atr_shift'] = df['atr'].shift(1)
+    df['obv_shift'] = df['obv'].shift(1)
     return df

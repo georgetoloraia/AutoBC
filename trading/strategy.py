@@ -2,6 +2,7 @@ import logging
 from indicators.technical_indicators import calculate_indicators
 from config.settings import TIMEFRAMES, TIMEFRAME_WEIGHTS, INDICATOR_WEIGHTS, BUY_CONFIDENCE_THRESHOLD, SELL_CONFIDENCE_THRESHOLD
 import pandas as pd
+
 logger = logging.getLogger(__name__)
 
 def simplified_evaluate_trading_signals(data):
@@ -13,7 +14,7 @@ def simplified_evaluate_trading_signals(data):
                      with OHLCV data.
 
     Returns:
-        str: "buy", "sell", "wait" based on aggregated confidence scores.
+        str: "buy", "sell", or "wait" based on aggregated confidence scores.
     """
     aggregate_buy_confidence = 0
     aggregate_sell_confidence = 0
@@ -33,18 +34,38 @@ def simplified_evaluate_trading_signals(data):
         try:
             df = calculate_indicators(df)
             latest = df.iloc[-1]
+            previous = df.iloc[-2] if len(df) > 1 else None
         except Exception as e:
             logger.error(f"Error calculating indicators for {timeframe}: {e}")
             continue
 
-        # Validate indicators
-        if not validate_indicators(latest):
-            logger.warning(f"Missing or invalid indicators for {timeframe}. Skipping.")
-            continue
+        # Buy conditions
+        buy_conditions = [
+            latest['close'] < latest['lower_band'],
+            latest['rsi'] < 30,
+            latest['macd'] > latest['macd_signal'],
+            latest['adx'] > 30 and latest['+DI'] > latest['-DI'],
+            latest['close'] > latest['vwap'],
+            latest['mfi'] < 20,
+            previous is not None and latest['atr'] > previous['atr'],  # Compare current ATR with its previous value
+            previous is not None and latest['obv'] > previous['obv']   # Compare current OBV with its previous value
+        ]
+
+        # Sell conditions
+        sell_conditions = [
+            latest['close'] > latest['upper_band'],
+            latest['rsi'] > 70,
+            latest['macd'] < latest['macd_signal'],
+            latest['adx'] > 25 and latest['-DI'] > latest['+DI'],
+            latest['close'] < latest['vwap'],
+            latest['mfi'] > 80,
+            previous is not None and latest['atr'] < previous['atr'],  # Compare current ATR with its previous value
+            previous is not None and latest['obv'] < previous['obv']   # Compare current OBV with its previous value
+        ]
 
         # Evaluate buy and sell conditions
-        buy_confidence = evaluate_conditions(latest, INDICATOR_WEIGHTS, buy=True)
-        sell_confidence = evaluate_conditions(latest, INDICATOR_WEIGHTS, buy=False)
+        buy_confidence = evaluate_conditions(buy_conditions)
+        sell_confidence = evaluate_conditions(sell_conditions)
 
         # Apply timeframe weights
         timeframe_weight = TIMEFRAME_WEIGHTS.get(timeframe, 1.0)
@@ -77,65 +98,18 @@ def simplified_evaluate_trading_signals(data):
     )
 
 
-def evaluate_conditions(latest, indicator_weights, buy=True):
+def evaluate_conditions(conditions):
     """
-    Evaluate conditions for buy or sell signals.
+    Evaluate buy or sell conditions.
 
     Parameters:
-        latest (pd.Series): Latest row of indicator data.
-        indicator_weights (dict): Dictionary of conditions and weights.
-        buy (bool): If True, evaluates buy conditions; otherwise, evaluates sell conditions.
+        conditions (list): List of boolean conditions.
 
     Returns:
         float: Confidence score based on the conditions.
     """
-    score = 0
-    for condition, weight in indicator_weights.items():
-        try:
-            # Adjust condition logic for buy/sell
-            condition_met = eval(condition, None, latest.to_dict()) if buy else not eval(condition, None, latest.to_dict())
-            logger.debug(f"Condition: {condition}, Met: {condition_met}, Weight: {weight}")
-            score += weight if condition_met else -weight
-        except Exception as e:
-            logger.error(f"Error evaluating condition '{condition}': {e}")
-            continue
-    return max(0, min(score, 1))  # Clamp score between 0 and 1
-
-
-def evaluate_condition(condition, data):
-    """
-    Evaluate a single condition using the latest data.
-
-    Parameters:
-        condition (str): Condition as a string (e.g., "close < lower_band").
-        data (pd.Series): Latest row of indicator data.
-
-    Returns:
-        bool: Whether the condition is met.
-    """
-    try:
-        return eval(condition, None, data.to_dict())
-    except Exception as e:
-        logger.error(f"Error evaluating condition '{condition}': {e}")
-        return False
-
-
-def validate_indicators(latest):
-    """
-    Validate that all required indicators are present and non-NaN.
-
-    Parameters:
-        latest (pd.Series): Latest row of indicator data.
-
-    Returns:
-        bool: True if all indicators are valid, False otherwise.
-    """
-    required_columns = ['close', 'lower_band', 'rsi', 'macd', 'macd_signal', 'adx', 'plus_DI', 'minus_DI', 'vwap', 'mfi']
-    for col in required_columns:
-        if col not in latest or pd.isna(latest[col]):
-            logger.warning(f"Missing or NaN value for indicator: {col}")
-            return False
-    return True
+    valid_conditions = [cond for cond in conditions if cond is not None]
+    return sum(valid_conditions) / len(valid_conditions) if valid_conditions else 0.0
 
 
 def log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence):

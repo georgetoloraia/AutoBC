@@ -17,7 +17,7 @@ USE_ML = False  # Disabled for now, as you're not using ChatGPT or ML
 ML_MODEL_PATH = "data/ml_model.pkl"
 OPENAI_API_KEY = os.getenv('open_api_key')
 
-quote_currency = False  # If true, trade all pairs with the quote currency (e.g., USDT)
+quote_currency = True  # If true, trade all pairs with the quote currency (e.g., USDT)
 INITIAL_INVESTMENT = 5.0  # USD
 STOP_LOSS_PERCENTAGE = 0.02  # 2%
 TAKE_PROFIT_PERCENTAGE = 0.05  # Initial take-profit percentage (5%)
@@ -31,12 +31,12 @@ BUY_CONFIDENCE_THRESHOLD = 0.8
 SELL_CONFIDENCE_THRESHOLD = 0.8
 
 TIMEFRAME_WEIGHTS = {
-    '1m': 0.3,   # Short-term, very noisy, low weight
-    '3m': 0.5,   # Slightly more reliable than 1m
-    '5m': 0.6,   # Common timeframe for scalping
-    '15m': 0.8,  # Balanced between short-term noise and trend reliability
+    '1m': 0.4,   # Short-term, very noisy, low weight
+    '3m': 0.6,   # Slightly more reliable than 1m
+    '5m': 1.0,   # Common timeframe for scalping
+    '15m': 1.2,  # Balanced between short-term noise and trend reliability
     '30m': 1.0,  # Stronger signals, suitable for intraday trading
-    '1h': 1.2    # Reliable for intraday and swing trading
+    '1h': 0.8    # Reliable for intraday and swing trading
 }
 '''
 This wait
