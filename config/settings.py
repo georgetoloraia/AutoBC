@@ -27,8 +27,8 @@ PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
 MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 
 TIMEFRAMES = ['1m', '3m', '5m', '15m', '30m', '1h']
-BUY_CONFIDENCE_THRESHOLD = 0.8
-SELL_CONFIDENCE_THRESHOLD = 0.8
+BUY_CONFIDENCE_THRESHOLD = 0.55
+SELL_CONFIDENCE_THRESHOLD = 0.6
 
 TIMEFRAME_WEIGHTS = {
     '1m': 0.4,   # Short-term, very noisy, low weight
