@@ -26,7 +26,7 @@ TAKE_PROFIT_PERCENTAGE = 0.05  # Initial take-profit percentage (5%)
 PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
 MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 
-TIMEFRAMES = ['1', '3m', '5m', '15m', '30m', '1h']
+TIMEFRAMES = ['1m', '3m', '5m', '15m', '30m', '1h']
 BUY_CONFIDENCE_THRESHOLD = 0.8
 SELL_CONFIDENCE_THRESHOLD = 0.8
 
