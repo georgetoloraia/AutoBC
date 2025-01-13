@@ -171,7 +171,7 @@ async def advanced_trade():
                             current_price = current_price['last']
 
                             # profit += Logic
-                            if start_time % 15 == 0:
+                            if start_time % 5 == 0:
                                 historical_prices = await fetch_historical_prices(pair)
                                 if not historical_prices:
                                     logger.warning("Failed to refresh historical prices.")
