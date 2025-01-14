@@ -187,7 +187,7 @@ async def advanced_trade():
 
                             # Calculate take-profit and stop-loss prices
                             take_profit_price = buy_price * (1 + profit_percentage)
-                            stop_loss_price = current_price * (1 - stop_loss_buffer)
+                            stop_loss_price = buy_price * (1 - stop_loss_buffer)
 
                             logger.info(f"Current Price: {current_price}")
                             logger.info(f"Take-Profit Price: {take_profit_price}")

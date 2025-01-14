@@ -150,7 +150,7 @@ def determine_final_signal(aggregate_buy, aggregate_sell, total_weight, buy_thre
     logger.info(f"avg_buy_confidence: {avg_buy_confidence:.2f} | aggregate_buy: {aggregate_buy:.2f} | total_weight: {total_weight:.2f}")
 
     logger.info(f"avg_sell_confidence = aggregate_sell / total_weight:")
-    logger.info(f"avg_buy_confidence: {avg_buy_confidence:.2f} | aggregate_sell: {aggregate_sell:.2f} | total_weight: {total_weight:.2f}")
+    logger.info(f"avg_sell_confidence: {avg_sell_confidence:.2f} | aggregate_sell: {aggregate_sell:.2f} | total_weight: {total_weight:.2f}")
 
     if avg_buy_confidence >= buy_threshold:
         logger.info(f"Buy signal triggered with average buy confidence: {avg_buy_confidence:.2f}")
