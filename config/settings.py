@@ -46,37 +46,18 @@ This wait
 '''
 
 INDICATOR_WEIGHTS = {
-    # Bollinger Bands
-    'close < lower_band': 0.2,   # Price below lower Bollinger Band (oversold)
-    'close > upper_band': 0.2,   # Price above upper Bollinger Band (overbought)
-
-    # RSI
-    'rsi < 30': 0.2,             # RSI below 30 (oversold)
-    'rsi > 70': 0.2,             # RSI above 70 (overbought)
-
-    # MACD
-    'macd > macd_signal': 0.25,  # MACD bullish crossover
-    'macd < macd_signal': 0.25,  # MACD bearish crossover
-
-    # ADX and Directional Indicators
-    'adx > 30 and +DI > -DI': 0.25,  # Strong trend with bullish directional movement
-    'adx > 25 and -DI > +DI': 0.25,  # Strong trend with bearish directional movement
-
-    # Money Flow Index (MFI)
-    'mfi < 20': 0.15,            # MFI indicating oversold
-    'mfi > 80': 0.15,            # MFI indicating overbought
-
-    # VWAP
-    'close > vwap': 0.1,         # Price above VWAP (bullish)
-    'close < vwap': 0.1,         # Price below VWAP (bearish)
-
-    # Average True Range (ATR)
-    'atr > atr.shift(1)': 0.1,   # Increasing volatility
-
-    # OBV (On-Balance Volume)
-    'obv > obv.shift(1)': 0.1,   # Positive volume flow (bullish)
-    'obv < obv.shift(1)': 0.1    # Negative volume flow (bearish)
+    'close < lower_band': 0.15,       # Bollinger Bands oversold
+    'close > upper_band': 0.15,       # Bollinger Bands overbought
+    'rsi < 30': 0.15,                 # RSI oversold
+    'rsi > 70': 0.15,                 # RSI overbought
+    'macd > macd_signal': 0.3,        # Strong bullish crossover
+    'adx > 30 and +DI > -DI': 0.3,    # Confirmed trend strength
+    'close > vwap': 0.1,              # Above VWAP (bullish momentum)
+    'mfi < 20': 0.1,                  # Oversold condition (volume-based)
+    'atr > atr.shift(1)': 0.1,        # Increasing volatility
+    'obv > obv.shift(1)': 0.1         # Positive volume flow
 }
+
 
 
 

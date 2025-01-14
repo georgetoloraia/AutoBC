@@ -1,6 +1,6 @@
 import logging
 from indicators.technical_indicators import calculate_indicators
-from config.settings import TIMEFRAMES
+from config.settings import TIMEFRAMES_FOR_SCORE
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def calculate_indicator_score(data):
         ("mfi < 20", 0.1)  # Money Flow Index indicating oversold
     ]
 
-    for timeframe in TIMEFRAMES:
+    for timeframe in TIMEFRAMES_FOR_SCORE:
         if timeframe not in data:
             logger.info(f"No data available for {timeframe}")
             continue
