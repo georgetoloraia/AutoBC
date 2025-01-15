@@ -133,7 +133,7 @@ def analyze_order_book(order_book):
     asks = order_book.get('asks', [])
 
     if not bids or not asks:
-        return None, None, None
+        return 0.0, 0.0, 0.0
 
     total_bid_volume = sum([bid[1] for bid in bids])
     total_ask_volume = sum([ask[1] for ask in asks])
