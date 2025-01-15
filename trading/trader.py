@@ -2,7 +2,6 @@ import ccxt.async_support as ccxt
 import asyncio
 import logging
 import pandas as pd
-import time
 from config import settings
 from trading.strategy import simplified_evaluate_trading_signals
 from notifications.telegram_bot import send_telegram_message
@@ -44,7 +43,7 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=['1m', '3m', '5m', '15m', '30m', '1h'], limit=1000):
+async def fetch_historical_prices(pair, timeframes=settings.TIMEFRAMES, limit=1000):
     data = {}
     try:
         for timeframe in timeframes:
@@ -62,23 +61,32 @@ async def fetch_historical_prices(pair, timeframes=['1m', '3m', '5m', '15m', '30
     except Exception as e:
         logger.error(f"Error fetching historical prices for {pair}: {e}")
         return data
-
-async def rate_limited_fetch(func, *args, **kwargs):
-    """
-    Wrapper for API calls to handle rate limits.
-    """
+    
+async def fetch_historical_prices_for_score(pair, timeframes=settings.TIMEFRAMES_FOR_SCORE, limit=1000):
+    data = {}
     try:
-        return await func(*args, **kwargs)
-    except ccxt.RateLimitExceeded as e:
-        logger.warning("Rate limit exceeded. Sleeping for 1 minute.")
-        await asyncio.sleep(60)
-        return await func(*args, **kwargs)
+        for timeframe in timeframes:
+            ohlcv = await exchange.fetch_ohlcv(pair, timeframe=settings.TIMEFRAMES_FOR_SCORE, limit=limit)
+            if not ohlcv:
+                logger.info(f"No data returned for {pair} in {timeframe} timeframe.")
+                continue
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            df.set_index('timestamp', inplace=True)
+            df = preprocess_data(df)
+            df = calculate_indicators(df)
+            data[timeframe] = df
+        return data
+    except Exception as e:
+        logger.error(f"Error fetching historical prices for {pair}: {e}")
+        return data
 
 async def fetch_order_book(pair):
-    return await rate_limited_fetch(exchange.fetch_order_book, pair)
-
-async def fetch_recent_trades(pair, limit=100):
-    return await rate_limited_fetch(exchange.fetch_trades, pair, limit=limit)
+    try:
+        return await exchange.fetch_order_book(pair)
+    except Exception as e:
+        logger.error(f"Error fetching order book for {pair}: {e}")
+        return None
 
 async def get_balance(currency):
     """
@@ -87,13 +95,13 @@ async def get_balance(currency):
     cache_duration = 60  # Cache for 1 minute
     if currency in balance_cache:
         cached_balance, timestamp = balance_cache[currency]
-        if (time.time() - timestamp) < cache_duration:
+        if (pd.Timestamp.now() - timestamp).seconds < cache_duration:
             return cached_balance
 
     try:
         balance = await exchange.fetch_balance()
         available_balance = balance['free'][currency]
-        balance_cache[currency] = (available_balance, time.time())
+        balance_cache[currency] = (available_balance, pd.Timestamp.now())
         logger.info(f"Available balance for {currency}: {available_balance}")
         return available_balance
     except Exception as e:
@@ -119,6 +127,49 @@ async def place_market_order(pair, side, amount):
         logger.error(f"Error placing {side} order for {pair}: {e}")
         await send_telegram_message(f"Error placing {side} order for {pair}: {e}")
         return None
+    
+async def convert_to_usdt(pair):
+    try:
+        asset = pair.split('/')[0]
+        asset_balance = await get_balance(asset)
+        if asset_balance > 0:
+            # Check if the exchange supports direct conversion to USDT
+            conversion_pair = f"{asset}/USDT"
+            market = await exchange.fetch_ticker(conversion_pair)
+            if market:
+                order_result = await place_market_order(conversion_pair, 'sell', asset_balance)
+                if order_result:
+                    logger.info(f"Converted {asset_balance} of {asset} to USDT")
+                    await send_telegram_message(f"Converted {asset_balance} of {asset} to USDT.")
+                    return order_result
+            else:
+                logger.info(f"Direct conversion pair {conversion_pair} not available. Selling manually.")
+                # If direct conversion is not available, sell the asset first
+                order_result = await place_market_order(pair, 'sell', asset_balance)
+                if order_result:
+                    await send_telegram_message(f"Sold {asset_balance} of {asset} manually. Converting to USDT.")
+                    await asyncio.sleep(2)  # Allow some time for the market to update
+                    return await convert_to_usdt(pair)
+        else:
+            logger.info(f"No {asset} balance to convert to USDT")
+    except Exception as e:
+        logger.error(f"An error occurred converting {pair} to USDT: {e}")
+    return None
+
+async def rate_limited_fetch(func, *args, **kwargs):
+    """
+    Wrapper to handle rate limits gracefully for exchange API calls.
+    """
+    try:
+        return await func(*args, **kwargs)
+    except ccxt.RateLimitExceeded as e:
+        logger.warning("Rate limit exceeded. Sleeping for 1 minute.")
+        await asyncio.sleep(60)
+        return await func(*args, **kwargs)
+    except Exception as e:
+        logger.error(f"API request failed: {e}")
+        return None
+
 
 async def advanced_trade():
     """
@@ -145,66 +196,66 @@ async def advanced_trade():
                     continue
 
                 # Evaluate trading signals
-                trading_signals = simplified_evaluate_trading_signals(historical_prices)
-                logger.info(f"Trading signals for {pair}: {trading_signals}")
+                trading_signal = simplified_evaluate_trading_signals(historical_prices, order_book)
+                logger.info(f"Trading signal for {pair}: {trading_signal}")
 
-                # Initialize dynamic profit-taking parameters
-                profit_percentage = settings.TAKE_PROFIT_PERCENTAGE
-                profit_step = 0.005  # Increment profit by 1% on positive signals
-                max_profit_percentage = 0.30  # Cap at 20% profit
-                stop_loss_buffer = 0.02  # Adjust stop-loss to 2% below current price
-                buy_price = None  # Track the price at which the asset was bought
-
-                if 'buy' in trading_signals:
+                if trading_signal == "buy":
                     usdt_balance = await get_balance('USDT')
-                    amount_to_buy = usdt_balance / order_book['asks'][0][0]
+                    amount_to_buy = usdt_balance / historical_prices['1m']['close'].iloc[-1]
                     buy_order = await place_market_order(pair, 'buy', amount_to_buy)
 
                     if buy_order:
-                        buy_price = order_book['asks'][0][0]  # Record buy price
+                        buy_price = historical_prices['1m']['close'].iloc[-1]
                         logger.info(f"Bought {pair} at {buy_price}")
-                        start_time = 0
+
+                        # Dynamic profit-taking loop
+                        profit_percentage = settings.TAKE_PROFIT_PERCENTAGE
+                        profit_step = settings.PROFIT_STEP
+                        max_profit_percentage = settings.MAX_PROFIT_PERCENTAGE
+                        stop_loss_buffer = settings.STOP_LOSS_PERCENTAGE
+
+                        score_time = 0
 
                         while True:
-                            start_time += 1
-                            current_price = await rate_limited_fetch(exchange.fetch_ticker, pair)
-                            current_price = current_price['last']
+                            try:
+                                # Fetch the latest current price
+                                ticker = await rate_limited_fetch(exchange.fetch_ticker, pair)
+                                current_price = ticker['last']  # Get the latest price from the ticker data
 
-                            # profit += Logic
-                            if start_time % 5 == 0:
-                                historical_prices = await fetch_historical_prices(pair)
-                                if not historical_prices:
-                                    logger.warning("Failed to refresh historical prices.")
-                                    continue
-                                logger.info("Historical prices refreshed.")
+                                if score_time % 5 == 0:
+                                    historical_prices = await fetch_historical_prices(pair)
+                                    if not historical_prices:
+                                        continue
+                                    profit_percentage += calculate_indicator_score(historical_prices) * profit_step
+                                    profit_percentage = min(profit_percentage, max_profit_percentage)
 
-                            # Calculate indicator score
-                            score = calculate_indicator_score(historical_prices)
-                            logger.info(f"Indicator score for {pair}: {score:.2f}")
+                                    take_profit_price = buy_price * (1 + profit_percentage)
+                                    stop_loss_price = buy_price * (1 - stop_loss_buffer)
 
-                            profit_percentage += score * profit_step
-                            profit_percentage = min(max(profit_percentage, 0.01), max_profit_percentage)  # Clamp between 1% and 20%
+                                logger.info(f"Current Price: {current_price:.2f}, Take-Profit: {take_profit_price:.2f}, Stop-Loss: {stop_loss_price:.2f}")
 
-                            # Calculate take-profit and stop-loss prices
-                            take_profit_price = buy_price * (1 + profit_percentage)
-                            stop_loss_price = buy_price * (1 - stop_loss_buffer)
+                                score_time += 1
 
-                            logger.info(f"Current Price: {current_price}")
-                            logger.info(f"Take-Profit Price: {take_profit_price}")
-                            logger.info(f"Stop-Loss Price: {stop_loss_price}\n")
-
-
-                            if current_price >= take_profit_price:
-                                logger.info(f"Take-Profit triggered! Selling at {current_price}")
-                                await place_market_order(pair, 'sell', amount_to_buy)
-                                break
-                            elif current_price <= stop_loss_price:
-                                logger.info(f"Stop-Loss triggered! Selling at {current_price}")
-                                await place_market_order(pair, 'sell', amount_to_buy)
-                                break
-
-                            await asyncio.sleep(60)
-                print("Signal determined: 'Wait'")
+                                # Check if price hits take-profit or stop-loss levels
+                                if current_price >= take_profit_price:
+                                    logger.info(f"Take-Profit triggered! Selling at {current_price}")
+                                    selling = await place_market_order(pair, 'sell', amount_to_buy)
+                                    if not selling:
+                                        await convert_to_usdt(pair)
+                                    break
+                                elif current_price <= stop_loss_price:
+                                    logger.info(f"Stop-Loss triggered! Selling at {current_price}")
+                                    stopping = await place_market_order(pair, 'sell', amount_to_buy)
+                                    if not stopping:
+                                        await convert_to_usdt(pair)
+                                    break
+                                
+                                # Wait before the next iteration
+                                await asyncio.sleep(20)
+                            except Exception as e:
+                                logger.error(f"Error fetching current price or processing trade logic: {e}")
+                                await asyncio.sleep(20)  # Retry after a short delay
+                        await asyncio.sleep(2)
 
                 # elif 'sell' in trading_signals.values():
                 #     continue
@@ -212,6 +263,8 @@ async def advanced_trade():
                     # asset_balance = await get_balance(asset)
                     # await place_market_order(pair, 'sell', asset_balance)
                     # logger.info(f"Sold {pair}")
+
+                    await asyncio.sleep(1)
 
                 await asyncio.sleep(5)
 

@@ -1,6 +1,6 @@
 import logging
 from indicators.technical_indicators import calculate_indicators
-from config.settings import TIMEFRAMES_FOR_SCORE
+from config.settings import TIMEFRAMES_FOR_SCORE, INDICATOR_WEIGHTS
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +20,13 @@ def calculate_indicator_score(data):
 
     # Define conditions and weights
     conditions = [
-        ("close < lower_band", 0.2),  # Price below lower Bollinger Band
-        ("rsi < 30", 0.2),  # RSI below 30 (oversold)
-        ("macd > macd_signal", 0.2),  # MACD bullish crossover
-        ("adx > 30 and +DI > -DI", 0.2),  # Strong ADX trend
-        ("close > vwap", 0.1),  # Price above VWAP
-        ("mfi < 20", 0.1)  # Money Flow Index indicating oversold
-    ]
+            (latest['close'] < latest['lower_band'], INDICATOR_WEIGHTS['close < lower_band']),
+            (latest['rsi'] < 30, INDICATOR_WEIGHTS['rsi < 30']),
+            (latest['macd'] > latest['macd_signal'], INDICATOR_WEIGHTS['macd > macd_signal']),
+            (latest['adx'] > 30 and latest['+DI'] > latest['-DI'], INDICATOR_WEIGHTS['adx > 30 and +DI > -DI']),
+            (latest['close'] > latest['vwap'], INDICATOR_WEIGHTS['close > vwap']),
+            (latest['mfi'] < 20, INDICATOR_WEIGHTS['mfi < 20']),
+        ]
 
     for timeframe in TIMEFRAMES_FOR_SCORE:
         if timeframe not in data:

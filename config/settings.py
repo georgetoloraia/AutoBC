@@ -39,11 +39,6 @@ TIMEFRAME_WEIGHTS = {
     '30m': 1.0,  # Stronger signals, suitable for intraday trading
     '1h': 0.8    # Reliable for intraday and swing trading
 }
-'''
-This wait
-    '4h': 1.5,   # Suitable for swing trading and longer-term trends
-    '1d': 2.0    # Best for confirming overall market direction
-'''
 
 INDICATOR_WEIGHTS = {
     'close < lower_band': 0.15,       # Bollinger Bands oversold
@@ -59,6 +54,21 @@ INDICATOR_WEIGHTS = {
 }
 
 
+DESIRED_COINS = [
+    # High Liquidity and Stability
+    "BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT", "MATIC/USDT",
+
+    # Moderate Volatility
+    "SOL/USDT", "DOT/USDT", "AVAX/USDT", "ATOM/USDT", "LTC/USDT", "LINK/USDT", 
+    "NEAR/USDT", "ALGO/USDT",
+
+    # Speculative and High Volatility
+    "DOGE/USDT", "PEPE/USDT", "SHIB/USDT", "APT/USDT", "PROM/USDT", "RNDR/USDT", 
+    "ROSE/USDT", "STG/USDT",
+
+    # Momentum Plays
+    "GALA/USDT", "FTM/USDT", "SAND/USDT", "AXS/USDT", "IMX/USDT", "CFX/USDT"
+]
 
 
 DESIRED_COINS_FALSE = [
@@ -77,20 +87,4 @@ DESIRED_COINS_FALSE = [
     "KNC/USDT",   # Kyber Network - Moderate momentum, short-term opportunities
     "TFUEL/USDT", # Theta Fuel - Significant short-term price changes
     "MATIC/USDT", # Polygon - Stable upward trends with moderate volatility
-]
-
-DESIRED_COINS = [
-    # High Liquidity and Stability
-    "BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT", "MATIC/USDT",
-
-    # Moderate Volatility
-    "SOL/USDT", "DOT/USDT", "AVAX/USDT", "ATOM/USDT", "LTC/USDT", "LINK/USDT", 
-    "NEAR/USDT", "ALGO/USDT",
-
-    # Speculative and High Volatility
-    "DOGE/USDT", "PEPE/USDT", "SHIB/USDT", "APT/USDT", "PROM/USDT", "RNDR/USDT", 
-    "ROSE/USDT", "STG/USDT",
-
-    # Momentum Plays
-    "GALA/USDT", "FTM/USDT", "SAND/USDT", "AXS/USDT", "IMX/USDT", "CFX/USDT"
 ]
