@@ -223,7 +223,7 @@ async def advanced_trade():
                                 current_price = ticker['last']  # Get the latest price from the ticker data
 
                                 if score_time % 5 == 0:
-                                    historical_prices = await fetch_historical_prices(pair)
+                                    historical_prices = await fetch_historical_prices_for_score(pair)
                                     if not historical_prices:
                                         continue
                                     profit_percentage += calculate_indicator_score(historical_prices) * profit_step
