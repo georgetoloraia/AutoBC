@@ -91,7 +91,7 @@ def simplified_evaluate_trading_signals(data, order_book):
 
     # Evaluate order book data
     total_bid_volume, total_ask_volume, spread = analyze_order_book(order_book)
-    if total_bid_volume > 1.5 * total_ask_volume:  # Example threshold
+    if total_bid_volume > total_ask_volume:  # Example threshold
         logger.info("Strong buying pressure detected based on order book.")
         order_book_signal = True
     else:

@@ -66,7 +66,7 @@ async def fetch_historical_prices_for_score(pair, timeframes=settings.TIMEFRAMES
     data = {}
     try:
         for timeframe in timeframes:
-            ohlcv = await exchange.fetch_ohlcv(pair, timeframe=settings.TIMEFRAMES_FOR_SCORE, limit=limit)
+            ohlcv = await exchange.fetch_ohlcv(pair, timeframe=timeframe, limit=limit)
             if not ohlcv:
                 logger.info(f"No data returned for {pair} in {timeframe} timeframe.")
                 continue

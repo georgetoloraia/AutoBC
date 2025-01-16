@@ -32,11 +32,11 @@ BUY_CONFIDENCE_THRESHOLD = 0.55
 SELL_CONFIDENCE_THRESHOLD = 0.6
 
 TIMEFRAME_WEIGHTS = {
-    '1m': 0.4,   # Short-term, very noisy, low weight
-    '3m': 0.6,   # Slightly more reliable than 1m
-    '5m': 1.0,   # Common timeframe for scalping
+    '1m': 0.8,   # Short-term, very noisy, low weight
+    '3m': 0.8,   # Slightly more reliable than 1m
+    '5m': 1.2,   # Common timeframe for scalping
     '15m': 1.2,  # Balanced between short-term noise and trend reliability
-    '30m': 1.0,  # Stronger signals, suitable for intraday trading
+    '30m': 0.8,  # Stronger signals, suitable for intraday trading
     '1h': 0.8    # Reliable for intraday and swing trading
 }
 
