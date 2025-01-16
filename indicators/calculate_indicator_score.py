@@ -18,16 +18,6 @@ def calculate_indicator_score(data):
     score = 0
     total_weight = 0
 
-    # Define conditions and weights
-    conditions = [
-            (latest['close'] < latest['lower_band'], INDICATOR_WEIGHTS['close < lower_band']),
-            (latest['rsi'] < 30, INDICATOR_WEIGHTS['rsi < 30']),
-            (latest['macd'] > latest['macd_signal'], INDICATOR_WEIGHTS['macd > macd_signal']),
-            (latest['adx'] > 30 and latest['+DI'] > latest['-DI'], INDICATOR_WEIGHTS['adx > 30 and +DI > -DI']),
-            (latest['close'] > latest['vwap'], INDICATOR_WEIGHTS['close > vwap']),
-            (latest['mfi'] < 20, INDICATOR_WEIGHTS['mfi < 20']),
-        ]
-
     for timeframe in TIMEFRAMES_FOR_SCORE:
         if timeframe not in data:
             logger.info(f"No data available for {timeframe}")
@@ -46,21 +36,27 @@ def calculate_indicator_score(data):
             logger.error(f"Error calculating indicators for {timeframe}: {e}")
             continue
 
+        # Define conditions and weights dynamically (AFTER latest is defined)
+        conditions = [
+            (latest['close'] < latest['lower_band'], INDICATOR_WEIGHTS['close < lower_band']),
+            (latest['rsi'] < 30, INDICATOR_WEIGHTS['rsi < 30']),
+            (latest['macd'] > latest['macd_signal'], INDICATOR_WEIGHTS['macd > macd_signal']),
+            (latest['adx'] > 30 and latest['+DI'] > latest['-DI'], INDICATOR_WEIGHTS['adx > 30 and +DI > -DI']),
+            (latest['close'] > latest['vwap'], INDICATOR_WEIGHTS['close > vwap']),
+            (latest['mfi'] < 20, INDICATOR_WEIGHTS['mfi < 20']),
+        ]
+
         # Evaluate conditions
         for condition, weight in conditions:
             try:
-                # Use eval to dynamically evaluate the condition
-                condition_met = eval(condition, None, latest.to_dict())
+                if condition:  # Direct boolean evaluation
+                    score += weight
+                else:
+                    score -= weight
+                total_weight += weight
             except Exception as e:
-                logger.error(f"Error evaluating condition '{condition}' for {timeframe}: {e}")
+                logger.error(f"Error evaluating condition in {timeframe}: {e}")
                 continue
-
-            # Adjust score based on condition result
-            total_weight += weight
-            if condition_met:
-                score += weight
-            else:
-                score -= weight
 
     # Normalize the score to a range of -1 to +1
     if total_weight > 0:
