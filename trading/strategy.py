@@ -11,9 +11,10 @@ def simplified_evaluate_trading_signals(data, order_book):
     Parameters:
         data (dict): Dictionary where keys are timeframes (e.g., '1m', '3m') and values are pandas DataFrames
                      with OHLCV data.
+        order_book (dict): Order book data with 'bids' and 'asks'.
 
     Returns:
-        dict: Dictionary containing buy and sell confidence scores per timeframe.
+        str: "buy", "sell", or "wait".
     """
     signals = {}
     aggregate_buy_confidence = 0
@@ -39,27 +40,8 @@ def simplified_evaluate_trading_signals(data, order_book):
             continue
 
         # Define buy and sell conditions
-        buy_conditions = [
-            latest['close'] < latest['lower_band'],  # Price below lower Bollinger Band
-            latest['rsi'] < 30,                     # RSI below 30 (oversold)
-            latest['macd'] > latest['macd_signal'], # MACD bullish crossover
-            latest['adx'] > 30 and latest['+DI'] > latest['-DI'],  # Strong trend with positive directional movement
-            latest['close'] > latest['vwap'],       # Price above VWAP
-            latest['mfi'] < 20,                     # Money Flow Index indicating oversold
-            previous is not None and latest['atr'] > previous['atr'],  # Increasing ATR
-            previous is not None and latest['obv'] > previous['obv']   # Increasing OBV
-        ]
-
-        sell_conditions = [
-            latest['close'] > latest['upper_band'],  # Price above upper Bollinger Band
-            latest['rsi'] > 70,                     # RSI above 70 (overbought)
-            latest['macd'] < latest['macd_signal'], # MACD bearish crossover
-            latest['adx'] > 25 and latest['-DI'] > latest['+DI'],  # Strong trend with negative directional movement
-            latest['close'] < latest['vwap'],       # Price below VWAP
-            latest['mfi'] > 80,                     # Money Flow Index indicating overbought
-            previous is not None and latest['atr'] < previous['atr'],  # Decreasing ATR
-            previous is not None and latest['obv'] < previous['obv']   # Decreasing OBV
-        ]
+        buy_conditions = define_buy_conditions(latest, previous)
+        sell_conditions = define_sell_conditions(latest, previous)
 
         # Evaluate conditions
         buy_confidence = evaluate_conditions(buy_conditions, INDICATOR_WEIGHTS)
@@ -81,36 +63,69 @@ def simplified_evaluate_trading_signals(data, order_book):
         }
 
     # Log aggregate confidence scores
-    logger.info(f"Aggregate Buy Confidence: {aggregate_buy_confidence:.2f}")
-    logger.info(f"Aggregate Sell Confidence: {aggregate_sell_confidence:.2f}")
+    log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence)
 
-    # Determine the final signal
+    # Normalize weights
     total_weight = sum(TIMEFRAME_WEIGHTS.values())
     avg_buy_confidence = aggregate_buy_confidence / total_weight
     avg_sell_confidence = aggregate_sell_confidence / total_weight
 
     # Evaluate order book data
-    total_bid_volume, total_ask_volume, spread = analyze_order_book(order_book)
-    if total_bid_volume > total_ask_volume:  # Example threshold
-        logger.info("Strong buying pressure detected based on order book.")
-        order_book_signal = True
-    else:
-        order_book_signal = False
+    order_book_signal = analyze_order_book(order_book)
 
-    if avg_buy_confidence >= BUY_CONFIDENCE_THRESHOLD and order_book_signal:
-        logger.info(f"Buy signal triggered with avg buy confidence: {avg_buy_confidence:.2f} and Book_order: {order_book_signal}")
-        return "buy"
-    elif avg_sell_confidence >= SELL_CONFIDENCE_THRESHOLD:
-        logger.info(f"Sell signal triggered with avg sell confidence: {avg_sell_confidence:.2f}")
-        return "sell"
+    # Determine the final signal
+    return determine_final_signal(avg_buy_confidence, avg_sell_confidence, order_book_signal)
 
-    logger.info("No clear signals found. Returning 'wait'")
-    return "wait"
+
+def define_buy_conditions(latest, previous):
+    """
+    Define buy conditions using technical indicators.
+
+    Parameters:
+        latest (pd.Series): Latest row of technical indicators.
+        previous (pd.Series): Previous row of technical indicators.
+
+    Returns:
+        list: List of boolean conditions for buying.
+    """
+    return [
+        latest['close'] < latest['lower_band'],
+        latest['rsi'] < 30,
+        latest['macd'] > latest['macd_signal'],
+        latest['adx'] > 30 and latest['+DI'] > latest['-DI'],
+        latest['close'] > latest['vwap'],
+        latest['mfi'] < 20,
+        previous is not None and latest['atr'] > previous['atr'],
+        previous is not None and latest['obv'] > previous['obv']
+    ]
+
+
+def define_sell_conditions(latest, previous):
+    """
+    Define sell conditions using technical indicators.
+
+    Parameters:
+        latest (pd.Series): Latest row of technical indicators.
+        previous (pd.Series): Previous row of technical indicators.
+
+    Returns:
+        list: List of boolean conditions for selling.
+    """
+    return [
+        latest['close'] > latest['upper_band'],
+        latest['rsi'] > 70,
+        latest['macd'] < latest['macd_signal'],
+        latest['adx'] > 25 and latest['-DI'] > latest['+DI'],
+        latest['close'] < latest['vwap'],
+        latest['mfi'] > 80,
+        previous is not None and latest['atr'] < previous['atr'],
+        previous is not None and latest['obv'] < previous['obv']
+    ]
 
 
 def evaluate_conditions(conditions, indicator_weights):
     """
-    Evaluate buy or sell conditions.
+    Evaluate conditions and calculate confidence score.
 
     Parameters:
         conditions (list): List of boolean conditions.
@@ -120,23 +135,73 @@ def evaluate_conditions(conditions, indicator_weights):
         float: Confidence score based on the conditions.
     """
     score = 0
-    total_weight = 0
-
+    total_weight = sum(indicator_weights.values())
     for condition, weight in zip(conditions, indicator_weights.values()):
-        total_weight += weight
-        score += weight if condition else 0
-
+        if condition:
+            score += weight
     return score / total_weight if total_weight > 0 else 0
 
+
 def analyze_order_book(order_book):
+    """
+    Analyze order book data to evaluate buying or selling pressure.
+
+    Parameters:
+        order_book (dict): Order book data with 'bids' and 'asks'.
+
+    Returns:
+        bool: True if strong buying pressure, False otherwise.
+    """
     bids = order_book.get('bids', [])
     asks = order_book.get('asks', [])
 
     if not bids or not asks:
-        return 0.0, 0.0, 0.0
+        return False
 
     total_bid_volume = sum([bid[1] for bid in bids])
     total_ask_volume = sum([ask[1] for ask in asks])
-    spread = asks[0][0] - bids[0][0]  # Calculate bid-ask spread
+    spread = asks[0][0] - bids[0][0]
 
-    return total_bid_volume, total_ask_volume, spread
+    logger.debug(f"Order Book Analysis - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Spread: {spread:.2f}")
+
+    return total_bid_volume > total_ask_volume
+
+
+def log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence):
+    """
+    Log detailed signal confidence for each timeframe and aggregate results.
+
+    Parameters:
+        signals (dict): Signals with confidence scores per timeframe.
+        aggregate_buy_confidence (float): Aggregate buy confidence.
+        aggregate_sell_confidence (float): Aggregate sell confidence.
+    """
+    for timeframe, details in signals.items():
+        logger.debug(f"Timeframe: {timeframe}, "
+                     f"Buy Confidence: {details['buy_confidence']:.2f}, "
+                     f"Sell Confidence: {details['sell_confidence']:.2f}")
+    logger.info(f"Aggregate Buy Confidence: {aggregate_buy_confidence:.2f}")
+    logger.info(f"Aggregate Sell Confidence: {aggregate_sell_confidence:.2f}")
+
+
+def determine_final_signal(avg_buy_confidence, avg_sell_confidence, order_book_signal):
+    """
+    Determine the final signal based on aggregated confidences and order book data.
+
+    Parameters:
+        avg_buy_confidence (float): Average buy confidence.
+        avg_sell_confidence (float): Average sell confidence.
+        order_book_signal (bool): Whether order book shows strong buying pressure.
+
+    Returns:
+        str: "buy", "sell", or "wait".
+    """
+    if avg_buy_confidence >= BUY_CONFIDENCE_THRESHOLD and order_book_signal:
+        logger.info(f"Buy signal triggered with avg buy confidence: {avg_buy_confidence:.2f} and order book signal.")
+        return "buy"
+    elif avg_sell_confidence >= SELL_CONFIDENCE_THRESHOLD:
+        logger.info(f"Sell signal triggered with avg sell confidence: {avg_sell_confidence:.2f}.")
+        return "sell"
+
+    logger.info("No clear signals found. Returning 'wait'.")
+    return "wait"
