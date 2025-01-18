@@ -26,12 +26,52 @@ TAKE_PROFIT_PERCENTAGE = 0.05  # Initial take-profit percentage (5%)
 PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
 MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 
-TIMEFRAMES = ['1m', '3m', '5m', '15m', '30m', '1h']
+TIMEFRAMES = [
+    '1s',
+    '1m',
+    '3m',
+    '5m',
+    '15m',
+    '30m',
+    '1h',
+    '2h',
+    '4h',
+    '6h',
+    '8h',
+    '12h',
+    '1d',
+    '3d',
+    '1w',
+    '1M'
+]
+
 TIMEFRAMES_FOR_SCORE = ['1m', '3m', '5m']
 BUY_CONFIDENCE_THRESHOLD = 0.55
 SELL_CONFIDENCE_THRESHOLD = 0.6
 
 TIMEFRAME_WEIGHTS = {
+    '1s': 0.8,  # Ultra-short-term, highly noisy but useful for scalping
+    '1m': 1.0,  # Short-term, quick signals
+    '3m': 1.2,  # Slightly more stable than 1m
+    '5m': 1.4,  # Short-term scalping, reliable for immediate trends
+    '15m': 1.6, # Balance between noise and short-term trends
+    '30m': 1.8, # Suitable for short-term directional trading
+    '1h': 1.5,  # Trend confirmation for short-term trading
+    '2h': 1.3,  # Supporting longer short-term trends
+    '4h': 1.0,  # Less influence, better for intraday/swing
+    '6h': 0.8,  # Minimal impact on short-term decisions
+    '8h': 0.6,  # Rarely used for short-term trading
+    '12h': 0.4, # Better for swing/medium-term
+    '1d': 0.2,  # Long-term trend confirmation
+    '3d': 0.1,  # Minimal impact on short-term trades
+    '1w': 0.05, # Negligible impact for scalping
+    '1M': 0.01  # Almost no relevance for short-term trading
+}
+
+
+
+
+TIMEFRAME_WEIGHTS_FALSE = {
     '1m': 0.8,   # Short-term, very noisy, low weight
     '3m': 0.9,   # Slightly more reliable than 1m
     '5m': 1.2,   # Common timeframe for scalping
