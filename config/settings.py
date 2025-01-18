@@ -27,6 +27,13 @@ PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
 MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 
 TIMEFRAMES = [
+    '1m',
+    '3m',
+    '5m',
+    '15m'
+]
+
+TIMEFRAMES_FALSE = [
     '1s',
     '1m',
     '3m',
@@ -50,6 +57,13 @@ BUY_CONFIDENCE_THRESHOLD = 0.55
 SELL_CONFIDENCE_THRESHOLD = 0.6
 
 TIMEFRAME_WEIGHTS = {
+    '1m': 1.0,  # Short-term, quick signals
+    '3m': 1.2,  # Slightly more stable than 1m
+    '5m': 1.4,  # Short-term scalping, reliable for immediate trends
+    '15m': 1.6
+}
+
+TIMEFRAME_WEIGHTS_FALSE = {
     '1s': 0.8,  # Ultra-short-term, highly noisy but useful for scalping
     '1m': 1.0,  # Short-term, quick signals
     '3m': 1.2,  # Slightly more stable than 1m
