@@ -222,7 +222,7 @@ async def advanced_trade():
                                 ticker = await rate_limited_fetch(exchange.fetch_ticker, pair)
                                 current_price = ticker['last']  # Get the latest price from the ticker data
 
-                                if score_time % 5 == 0:
+                                if score_time % 7 == 0:
                                     historical_prices = await fetch_historical_prices_for_score(pair)
                                     if not historical_prices:
                                         continue
@@ -268,7 +268,7 @@ async def advanced_trade():
 
                 await asyncio.sleep(5)
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(10)
         except Exception as e:
             logger.error(f"An error occurred during trading: {e}")
-            await asyncio.sleep(61)
+            await asyncio.sleep(10)

@@ -28,7 +28,6 @@ MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
 
 TIMEFRAMES = [
     '1m',
-    '3m',
     '5m',
     '15m'
 ]
@@ -52,13 +51,12 @@ TIMEFRAMES_FALSE = [
     '1M'
 ]
 
-TIMEFRAMES_FOR_SCORE = ['1m', '3m', '5m']
+TIMEFRAMES_FOR_SCORE = ['1m', '5m', '15m']
 BUY_CONFIDENCE_THRESHOLD = 0.55
 SELL_CONFIDENCE_THRESHOLD = 0.6
 
 TIMEFRAME_WEIGHTS = {
     '1m': 1.0,  # Short-term, quick signals
-    '3m': 1.2,  # Slightly more stable than 1m
     '5m': 1.4,  # Short-term scalping, reliable for immediate trends
     '15m': 1.6
 }
