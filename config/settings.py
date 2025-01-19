@@ -109,19 +109,37 @@ INDICATOR_WEIGHTS = {
 
 
 DESIRED_COINS = [
-    # High Liquidity and Stability
-    "BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT", "MATIC/USDT",
+    # Meme and Speculative Coins (High Volatility)
+    "DOGE/USDT",   # Dogecoin - Meme coin with large price swings
+    "SHIB/USDT",   # Shiba Inu - High volume, speculative
+    "PEPE/USDT",   # Pepe Coin - Extremely volatile
 
-    # Moderate Volatility
-    "SOL/USDT", "DOT/USDT", "AVAX/USDT", "ATOM/USDT", "LTC/USDT", "LINK/USDT", 
-    "NEAR/USDT", "ALGO/USDT",
+    # DeFi and Trending Tokens
+    "SOL/USDT",    # Solana - High price movements due to ecosystem developments
+    "DOT/USDT",    # Polkadot - Volatile, linked to DeFi and parachain auctions
+    "MATIC/USDT",  # Polygon - Layer-2 solution, significant price fluctuations
+    "NEAR/USDT",   # Near Protocol - Volatile, innovative ecosystem
+    "ARB/USDT",    # Arbitrum - High momentum in Layer 2 trading
 
-    # Speculative and High Volatility
-    "DOGE/USDT", "PEPE/USDT", "SHIB/USDT", "APT/USDT", "PROM/USDT", "RNDR/USDT", 
-    "ROSE/USDT", "STG/USDT",
+    # AI and Metaverse Tokens
+    "GALA/USDT",   # Gala Games - Metaverse-related, volatile price action
+    "IMX/USDT",    # Immutable X - Gaming and NFTs, fast-moving
+    "SAND/USDT",   # Sandbox - Metaverse coin with frequent spikes
+    "AXS/USDT",    # Axie Infinity - Volatile gaming coin
 
-    # Momentum Plays
-    "GALA/USDT", "FTM/USDT", "SAND/USDT", "AXS/USDT", "IMX/USDT", "CFX/USDT"
+    # Small Cap and High-Momentum Coins
+    "RNDR/USDT",   # Render Token - AI-related, sharp price movements
+    "APT/USDT",    # Aptos - New ecosystem with price volatility
+    "FIL/USDT",    # Filecoin - Storage coin with rapid price changes
+    "C98/USDT",    # Coin98 - DeFi tool with high momentum
+
+    # Other High-Volatility Coins
+    "FTM/USDT",    # Fantom - DeFi ecosystem token, very volatile
+    "OP/USDT",     # Optimism - Layer-2 token with sharp price movements
+    "ROSE/USDT",   # Oasis Network - Speculative and highly volatile
+    "PROM/USDT",   # Prom - Frequently high price movements
+    "LUNC/USDT",   # Terra Classic - Volatile after Luna collapse
+    "ONE/USDT",    # Harmony - Trending Layer-1 with momentum
 ]
 
 
