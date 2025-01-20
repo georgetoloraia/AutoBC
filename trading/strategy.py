@@ -87,7 +87,9 @@ def simplified_evaluate_trading_signals(data, order_book):
 
     # Evaluate reversal strategy
     buy_signal = define_reversal_strategy(df_15m, mode="buy")
+    logger.info(f"buy_signal: == {buy_signal}")
     sell_signal = define_reversal_strategy(df_15m, mode="sell")
+    logger.info(f"sell_signal: == {sell_signal}")
 
     # Evaluate order book
     order_book_signal = analyze_order_book(order_book)
