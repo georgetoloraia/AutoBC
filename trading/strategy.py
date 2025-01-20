@@ -151,7 +151,7 @@ def evaluate_conditions(conditions, indicator_weights):
 
 def analyze_order_book(order_book):
     """
-    Analyze order book data to evaluate buying or selling pressure.
+    Enhanced order book analysis to evaluate buying or selling pressure.
 
     Parameters:
         order_book (dict): Order book data with 'bids' and 'asks'.
@@ -167,14 +167,25 @@ def analyze_order_book(order_book):
 
     total_bid_volume = sum([bid[1] for bid in bids])
     total_ask_volume = sum([ask[1] for ask in asks])
-    spread = asks[0][0] - bids[0][0]
+    bid_ask_spread = asks[0][0] - bids[0][0]
+
+    # Imbalance Ratio
+    imbalance_ratio = total_bid_volume / (total_bid_volume + total_ask_volume)
+
+    # Volume Concentration (Top 3 Levels)
+    top_bid_volume = sum([bid[1] for bid in bids[:3]])
+    top_ask_volume = sum([ask[1] for ask in asks[:3]])
 
     logger.info(f"Order Book Analysis:")
     logger.info(f"  - Total Bid Volume: {total_bid_volume:.2f}")
     logger.info(f"  - Total Ask Volume: {total_ask_volume:.2f}")
-    logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
+    logger.info(f"  - Bid-Ask Spread: {bid_ask_spread:.6f}")
+    logger.info(f"  - Imbalance Ratio: {imbalance_ratio:.2f}")
+    logger.info(f"  - Top 3 Bid Volume: {top_bid_volume:.2f}")
+    logger.info(f"  - Top 3 Ask Volume: {top_ask_volume:.2f}")
 
-    return total_bid_volume > total_ask_volume
+    return imbalance_ratio > 0.6 and top_bid_volume > top_ask_volume
+
 
 def log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confidence):
     """
