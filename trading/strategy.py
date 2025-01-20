@@ -30,6 +30,8 @@ def simplified_evaluate_trading_signals(data, order_book):
     aggregate_buy_confidence = 0
     aggregate_sell_confidence = 0
 
+    logger.info("=== Starting Signal Evaluation ===")
+
     for timeframe in TIMEFRAMES:
         if timeframe not in data:
             logger.info(f"No data available for {timeframe}")
@@ -69,7 +71,9 @@ def simplified_evaluate_trading_signals(data, order_book):
         # Store confidence scores for the timeframe
         signals[timeframe] = {
             'buy_confidence': weighted_buy_confidence,
-            'sell_confidence': weighted_sell_confidence
+            'sell_confidence': weighted_sell_confidence,
+            'raw_buy_confidence': buy_confidence,
+            'raw_sell_confidence': sell_confidence,
         }
 
     # Log aggregate confidence scores
@@ -81,8 +85,14 @@ def simplified_evaluate_trading_signals(data, order_book):
     # Evaluate order book data
     order_book_signal = analyze_order_book(order_book)
 
+    # Log order book analysis
+    logger.info(f"Order Book Signal: {'Strong Buy' if order_book_signal else 'No Buy Signal'}")
+
     # Determine the final signal
-    return determine_final_signal(avg_buy_confidence, avg_sell_confidence, order_book_signal)
+    signal = determine_final_signal(avg_buy_confidence, avg_sell_confidence, order_book_signal)
+    logger.info(f"Final Determined Signal: {signal.upper()}")
+
+    return signal
 
 def define_conditions(latest, previous, mode="buy"):
     """
@@ -159,7 +169,10 @@ def analyze_order_book(order_book):
     total_ask_volume = sum([ask[1] for ask in asks])
     spread = asks[0][0] - bids[0][0]
 
-    logger.debug(f"Order Book Analysis - Total Bid Volume: {total_bid_volume}, Total Ask Volume: {total_ask_volume}, Spread: {spread:.2f}")
+    logger.info(f"Order Book Analysis:")
+    logger.info(f"  - Total Bid Volume: {total_bid_volume:.2f}")
+    logger.info(f"  - Total Ask Volume: {total_ask_volume:.2f}")
+    logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
 
     return total_bid_volume > total_ask_volume
 
@@ -172,12 +185,21 @@ def log_signal_details(signals, aggregate_buy_confidence, aggregate_sell_confide
         aggregate_buy_confidence (float): Aggregate buy confidence.
         aggregate_sell_confidence (float): Aggregate sell confidence.
     """
+    logger.info("\n=== Signal Details by Timeframe ===")
     for timeframe, details in signals.items():
-        logger.debug(f"Timeframe: {timeframe}, "
-                     f"Buy Confidence: {details['buy_confidence']:.2f}, "
-                     f"Sell Confidence: {details['sell_confidence']:.2f}")
-    logger.info(f"Aggregate Buy Confidence: {aggregate_buy_confidence:.2f}")
-    logger.info(f"Aggregate Sell Confidence: {aggregate_sell_confidence:.2f}")
+        logger.info(f"Timeframe: {timeframe}")
+        logger.info(f"  - Buy Confidence: {details['buy_confidence']:.4f}")
+        logger.info(f"  - Sell Confidence: {details['sell_confidence']:.4f}")
+
+    logger.info("\n=== Aggregated Signal Summary ===")
+    logger.info(f"Total Aggregate Buy Confidence: {aggregate_buy_confidence:.4f}")
+    logger.info(f"Total Aggregate Sell Confidence: {aggregate_sell_confidence:.4f}")
+
+    logger.info("\n=== Timeframe Weights ===")
+    for timeframe, weight in TIMEFRAME_WEIGHTS.items():
+        normalized_weight = weight / sum(TIMEFRAME_WEIGHTS.values())
+        logger.info(f"Timeframe: {timeframe}, Weight: {weight:.4f}, Normalized: {normalized_weight:.4f}")
+
 
 def determine_final_signal(avg_buy_confidence, avg_sell_confidence, order_book_signal):
     """
