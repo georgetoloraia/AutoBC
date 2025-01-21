@@ -140,3 +140,27 @@ def analyze_order_book(order_book):
     logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
 
     return total_bid_volume > total_ask_volume
+
+
+
+'''
+DESIRED_COINS = [
+    "BTC/USDT",  # Bitcoin - High volume, often volatile enough for short-term trading
+    "ETH/USDT",  # Ethereum - High volume, moderate volatility
+    "SOL/USDT",  # Solana - Volatile, often large intraday movements
+    "ADA/USDT",  # Cardano - Popular and moderately volatile
+    "BNB/USDT",  # Binance Coin - High volume, decent volatility
+    "XRP/USDT",  # Ripple - Consistent volume and price action
+    "DOGE/USDT",  # Dogecoin - Volatile, good for intraday strategies
+    "MATIC/USDT",  # Polygon - High liquidity, reasonable price swings
+    "LTC/USDT",  # Litecoin - Stable but shows good short-term trends
+    "SHIB/USDT",  # Shiba Inu - Highly volatile, good for scalping
+    "DOT/USDT",  # Polkadot - Decent liquidity and intraday moves
+    "AVAX/USDT",  # Avalanche - Volatility and decent volume
+    "APT/USDT",  # Aptos - Newer, higher volatility
+    "LINK/USDT",  # Chainlink - Moderate liquidity, but trends well
+    "ATOM/USDT",  # Cosmos - Good for consistent price trends
+]
+
+
+'''
