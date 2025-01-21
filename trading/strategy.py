@@ -18,7 +18,7 @@ def define_reversal_strategy(df, mode="buy"):
     prev_2 = df.iloc[-3]
     prev_3 = df.iloc[-4]
 
-    # logger.debug(f"Latest Close: {latest['close']}, Previous: {previous['close']}, Prev_2: {prev_2['close']}, Prev_3: {prev_3['close']}")
+    logger.info(f"Latest Close: {prev_3['close']}, Previous: {prev_2['close']}, Prev_2: {previous['close']}, Prev_3: {latest['close']}")
 
     if mode == "buy":
         downward_trend = prev_3['close'] >= prev_2['close'] >= previous['close']
@@ -28,11 +28,12 @@ def define_reversal_strategy(df, mode="buy"):
         adx_trending = latest['adx'] > 15
         increasing_volume = latest['volume'] > previous['volume']
 
+        logger.info(f"RSI Oversold Condition: {rsi_oversold}, RSI Value: {latest['rsi']:.2f}")
         logger.info(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
         logger.info(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
         logger.info(f"Increasing Volume: {increasing_volume}\n")
 
-        return downward_trend and upward_reversal and rsi_oversold and macd_bullish and adx_trending and increasing_volume
+        return downward_trend and upward_reversal and (rsi_oversold or (macd_bullish and adx_trending)) and increasing_volume
 
 
     elif mode == "sell":
@@ -118,9 +119,9 @@ def analyze_order_book(order_book):
     total_ask_volume = sum([ask[1] for ask in asks])
     spread = asks[0][0] - bids[0][0]
 
-    logger.info(f"Order Book Analysis:")
-    logger.info(f"  - Total Bid Volume: {total_bid_volume:.2f}")
-    logger.info(f"  - Total Ask Volume: {total_ask_volume:.2f}")
-    logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
+    # logger.info(f"Order Book Analysis:")
+    # logger.info(f"  - Total Bid Volume: {total_bid_volume:.2f}")
+    # logger.info(f"  - Total Ask Volume: {total_ask_volume:.2f}")
+    # logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
 
     return total_bid_volume > total_ask_volume
