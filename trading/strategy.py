@@ -21,13 +21,13 @@ def define_reversal_strategy(df, mode="buy"):
     logger.debug(f"Latest Close: {latest['close']}, Previous: {previous['close']}, Prev_2: {prev_2['close']}, Prev_3: {prev_3['close']}")
 
     if mode == "buy":
-        downward_trend = prev_3['close'] > prev_2['close'] > previous['close']
+        downward_trend = prev_3['close'] >= prev_2['close'] >= previous['close']
         upward_reversal = latest['close'] > previous['close']
         logger.info(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
 
-        rsi_oversold = latest['rsi'] < 30
+        rsi_oversold = latest['rsi'] < 40
         macd_bullish = latest['macd'] > latest['macd_signal']
-        adx_trending = latest['adx'] > 25
+        adx_trending = latest['adx'] > 20
         logger.info(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
 
         return downward_trend and upward_reversal and rsi_oversold and macd_bullish and adx_trending
