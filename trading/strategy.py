@@ -23,24 +23,24 @@ def define_reversal_strategy(df, mode="buy"):
     if mode == "buy":
         downward_trend = prev_3['close'] > prev_2['close'] > previous['close']
         upward_reversal = latest['close'] > previous['close']
-        logger.debug(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
+        logger.info(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
 
         rsi_oversold = latest['rsi'] < 30
         macd_bullish = latest['macd'] > latest['macd_signal']
         adx_trending = latest['adx'] > 25
-        logger.debug(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
+        logger.info(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
 
         return downward_trend and upward_reversal and rsi_oversold and macd_bullish and adx_trending
 
     elif mode == "sell":
         upward_trend = prev_3['close'] < prev_2['close'] < previous['close']
         downward_reversal = latest['close'] < previous['close']
-        logger.debug(f"Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
+        logger.info(f"Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
 
         rsi_overbought = latest['rsi'] > 70
         macd_bearish = latest['macd'] < latest['macd_signal']
         adx_trending = latest['adx'] > 25
-        logger.debug(f"RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, ADX Trending: {adx_trending}")
+        logger.info(f"RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, ADX Trending: {adx_trending}")
 
         return upward_trend and downward_reversal and rsi_overbought and macd_bearish and adx_trending
 
