@@ -26,7 +26,7 @@ def define_reversal_strategy(df, mode="buy"):
         rsi_oversold = latest['rsi'] < 45
         macd_bullish = latest['macd'] > latest['macd_signal']
         adx_trending = latest['adx'] > 15
-        increasing_volume = latest['volume'] > previous['volume']
+        increasing_volume = latest['volume'] >= previous['volume']
 
         logger.info(f"RSI Oversold Condition: {rsi_oversold}, RSI Value: {latest['rsi']:.2f}")
         logger.info(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
@@ -60,7 +60,7 @@ def simplified_evaluate_trading_signals(data, order_book):
     Returns:
         str: "buy", "sell", or "wait".
     """
-    logger.info("=== Evaluating Trading Signals ===")
+    logger.info("\n=== Evaluating Trading Signals ===")
 
     # Check for 15m timeframe
     if '15m' not in data:
