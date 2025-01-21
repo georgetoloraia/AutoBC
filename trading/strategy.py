@@ -9,51 +9,41 @@ from config.settings import (
 logger = logging.getLogger(__name__)
 
 def define_reversal_strategy(df, mode="buy"):
-    """
-    Detect a downward "close" followed by an upward one for buy/sell signals.
-
-    Parameters:
-        df (pd.DataFrame): DataFrame containing OHLCV data with calculated indicators.
-        mode (str): "buy" or "sell" to define the respective conditions.
-
-    Returns:
-        bool: True if the conditions for buy/sell are met, False otherwise.
-    """
-    if len(df) < 4:  # Ensure enough data points
+    if len(df) < 4:
+        logger.info("Insufficient data points for reversal strategy.")
         return False
 
-    # Get the last four rows
     latest = df.iloc[-1]
     previous = df.iloc[-2]
     prev_2 = df.iloc[-3]
     prev_3 = df.iloc[-4]
 
+    logger.debug(f"Latest Close: {latest['close']}, Previous: {previous['close']}, Prev_2: {prev_2['close']}, Prev_3: {prev_3['close']}")
+
     if mode == "buy":
-        # Downward trend followed by upward close
         downward_trend = prev_3['close'] > prev_2['close'] > previous['close']
         upward_reversal = latest['close'] > previous['close']
+        logger.debug(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
 
-        # Add confirmation indicators
         rsi_oversold = latest['rsi'] < 30
         macd_bullish = latest['macd'] > latest['macd_signal']
         adx_trending = latest['adx'] > 25
+        logger.debug(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
 
         return downward_trend and upward_reversal and rsi_oversold and macd_bullish and adx_trending
 
     elif mode == "sell":
-        # Upward trend followed by downward close
         upward_trend = prev_3['close'] < prev_2['close'] < previous['close']
         downward_reversal = latest['close'] < previous['close']
+        logger.debug(f"Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
 
-        # Add confirmation indicators
         rsi_overbought = latest['rsi'] > 70
         macd_bearish = latest['macd'] < latest['macd_signal']
         adx_trending = latest['adx'] > 25
+        logger.debug(f"RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, ADX Trending: {adx_trending}")
 
         return upward_trend and downward_reversal and rsi_overbought and macd_bearish and adx_trending
 
-    else:
-        raise ValueError("Invalid mode. Use 'buy' or 'sell'.")
 
 def simplified_evaluate_trading_signals(data, order_book):
     """
