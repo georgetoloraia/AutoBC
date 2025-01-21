@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def define_reversal_strategy(df, mode="buy"):
     if len(df) < 4:
-        logger.info("Insufficient data points for reversal strategy.")
+        logger.info("Insufficient data points for reversal strategy.\n")
         return False
 
     latest = df.iloc[-1]
@@ -18,29 +18,32 @@ def define_reversal_strategy(df, mode="buy"):
     prev_2 = df.iloc[-3]
     prev_3 = df.iloc[-4]
 
-    logger.debug(f"Latest Close: {latest['close']}, Previous: {previous['close']}, Prev_2: {prev_2['close']}, Prev_3: {prev_3['close']}")
+    # logger.debug(f"Latest Close: {latest['close']}, Previous: {previous['close']}, Prev_2: {prev_2['close']}, Prev_3: {prev_3['close']}")
 
     if mode == "buy":
         downward_trend = prev_3['close'] >= prev_2['close'] >= previous['close']
         upward_reversal = latest['close'] > previous['close']
-        logger.info(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
-
-        rsi_oversold = latest['rsi'] < 40
+        rsi_oversold = latest['rsi'] < 45
         macd_bullish = latest['macd'] > latest['macd_signal']
-        adx_trending = latest['adx'] > 20
-        logger.info(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
+        adx_trending = latest['adx'] > 15
+        increasing_volume = latest['volume'] > previous['volume']
 
-        return downward_trend and upward_reversal and rsi_oversold and macd_bullish and adx_trending
+        logger.info(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
+        logger.info(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
+        logger.info(f"Increasing Volume: {increasing_volume}\n")
+
+        return downward_trend and upward_reversal and rsi_oversold and macd_bullish and adx_trending and increasing_volume
+
 
     elif mode == "sell":
         upward_trend = prev_3['close'] < prev_2['close'] < previous['close']
         downward_reversal = latest['close'] < previous['close']
-        logger.info(f"Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
+        # logger.info(f"Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
 
         rsi_overbought = latest['rsi'] > 70
         macd_bearish = latest['macd'] < latest['macd_signal']
         adx_trending = latest['adx'] > 25
-        logger.info(f"RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, ADX Trending: {adx_trending}")
+        # logger.info(f"RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, ADX Trending: {adx_trending}")
 
         return upward_trend and downward_reversal and rsi_overbought and macd_bearish and adx_trending
 
@@ -77,9 +80,9 @@ def simplified_evaluate_trading_signals(data, order_book):
 
     # Evaluate reversal strategy
     buy_signal = define_reversal_strategy(df_15m, mode="buy")
-    logger.info(f"buy_signal: == {buy_signal}")
+    # logger.info(f"buy_signal: == {buy_signal}")
     sell_signal = define_reversal_strategy(df_15m, mode="sell")
-    logger.info(f"sell_signal: == {sell_signal}")
+    # logger.info(f"sell_signal: == {sell_signal}")
 
     # Evaluate order book
     order_book_signal = analyze_order_book(order_book)
