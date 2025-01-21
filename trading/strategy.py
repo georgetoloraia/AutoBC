@@ -1,57 +1,73 @@
 import logging
 from indicators.technical_indicators import calculate_indicators
 from config.settings import (
-    TIMEFRAME_WEIGHTS,
     BUY_CONFIDENCE_THRESHOLD,
     SELL_CONFIDENCE_THRESHOLD,
 )
 
 logger = logging.getLogger(__name__)
 
-def define_reversal_strategy(df, mode="buy"):
-    if len(df) < 4:
-        logger.info("Insufficient data points for reversal strategy.\n")
+def define_short_term_strategy(df, mode="buy"):
+    """
+    Define short-term trading strategy for 15-minute timeframe.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing OHLCV data with calculated indicators.
+        mode (str): "buy" or "sell" to define the respective conditions.
+
+    Returns:
+        bool: True if the conditions for buy/sell are met, False otherwise.
+    """
+    if len(df) < 4:  # Ensure enough data points
         return False
 
+    # Get the last four rows
     latest = df.iloc[-1]
     previous = df.iloc[-2]
     prev_2 = df.iloc[-3]
     prev_3 = df.iloc[-4]
 
-    logger.info(f"Latest Close: {prev_3['close']}, Previous: {prev_2['close']}, Prev_2: {previous['close']}, Prev_3: {latest['close']}")
-
     if mode == "buy":
-        downward_trend = prev_3['close'] >= prev_2['close'] >= previous['close']
+        # Detect downward trend and upward reversal
+        downward_trend = prev_3['close'] > prev_2['close'] > previous['close']
         upward_reversal = latest['close'] > previous['close']
-        rsi_oversold = latest['rsi'] < 45
+
+        # Indicators
+        rsi_oversold = latest['rsi'] < 40
         macd_bullish = latest['macd'] > latest['macd_signal']
-        adx_trending = latest['adx'] > 15
-        increasing_volume = latest['volume'] >= previous['volume']
+        volume_spike = latest['volume'] > df['volume'].rolling(10).mean().iloc[-1]
 
-        logger.info(f"RSI Oversold Condition: {rsi_oversold}, RSI Value: {latest['rsi']:.2f}")
-        logger.info(f"Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
-        logger.info(f"RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, ADX Trending: {adx_trending}")
-        logger.info(f"Increasing Volume: {increasing_volume}\n")
+        # Log details
+        logger.info(f"BUY Conditions - Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
+        logger.info(f"BUY Indicators - RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, Volume Spike: {volume_spike}")
 
-        return downward_trend and upward_reversal and (rsi_oversold or (macd_bullish and adx_trending)) and increasing_volume
-
+        # Combine conditions
+        return downward_trend and upward_reversal and rsi_oversold and macd_bullish and volume_spike
 
     elif mode == "sell":
+        # Detect upward trend and downward reversal
         upward_trend = prev_3['close'] < prev_2['close'] < previous['close']
         downward_reversal = latest['close'] < previous['close']
-        # logger.info(f"Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
 
-        rsi_overbought = latest['rsi'] > 70
+        # Indicators
+        rsi_overbought = latest['rsi'] > 65
         macd_bearish = latest['macd'] < latest['macd_signal']
-        adx_trending = latest['adx'] > 25
-        # logger.info(f"RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, ADX Trending: {adx_trending}")
+        volume_spike = latest['volume'] > df['volume'].rolling(10).mean().iloc[-1]
 
-        return upward_trend and downward_reversal and rsi_overbought and macd_bearish and adx_trending
+        # Log details
+        logger.info(f"SELL Conditions - Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
+        logger.info(f"SELL Indicators - RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, Volume Spike: {volume_spike}")
+
+        # Combine conditions
+        return upward_trend and downward_reversal and rsi_overbought and macd_bearish and volume_spike
+
+    else:
+        raise ValueError("Invalid mode. Use 'buy' or 'sell'.")
 
 
-def simplified_evaluate_trading_signals(data, order_book):
+def evaluate_short_term_signals(data, order_book):
     """
-    Evaluate trading signals based on the reversal strategy in the 15-minute timeframe.
+    Evaluate trading signals for 15-minute timeframe.
 
     Parameters:
         data (dict): Dictionary where keys are timeframes and values are DataFrames.
@@ -60,11 +76,11 @@ def simplified_evaluate_trading_signals(data, order_book):
     Returns:
         str: "buy", "sell", or "wait".
     """
-    logger.info("\n=== Evaluating Trading Signals ===")
+    logger.info("=== Evaluating 15-Minute Trading Signals ===")
 
-    # Check for 15m timeframe
+    # Ensure 15-minute data is available
     if '15m' not in data:
-        logger.warning("No data available for 15m timeframe.")
+        logger.warning("No data available for 15-minute timeframe.")
         return "wait"
 
     df_15m = data['15m']
@@ -79,25 +95,24 @@ def simplified_evaluate_trading_signals(data, order_book):
         logger.error(f"Error calculating indicators for 15m timeframe: {e}")
         return "wait"
 
-    # Evaluate reversal strategy
-    buy_signal = define_reversal_strategy(df_15m, mode="buy")
-    # logger.info(f"buy_signal: == {buy_signal}")
-    sell_signal = define_reversal_strategy(df_15m, mode="sell")
-    # logger.info(f"sell_signal: == {sell_signal}")
+    # Evaluate buy and sell signals
+    buy_signal = define_short_term_strategy(df_15m, mode="buy")
+    sell_signal = define_short_term_strategy(df_15m, mode="sell")
 
-    # Evaluate order book
+    # Evaluate order book signal
     order_book_signal = analyze_order_book(order_book)
 
-    # Determine final signal
+    # Determine final action
     if buy_signal and order_book_signal:
-        logger.info("Buy signal triggered based on 15m reversal strategy and order book analysis.")
+        logger.info("Buy signal triggered for 15m strategy.")
         return "buy"
     elif sell_signal:
-        logger.info("Sell signal triggered based on 15m reversal strategy.")
+        logger.info("Sell signal triggered for 15m strategy.")
         return "sell"
     else:
-        logger.info("No clear signals found. Returning 'wait'.")
+        logger.info("No clear signal. Returning 'wait'.")
         return "wait"
+
 
 def analyze_order_book(order_book):
     """
@@ -119,9 +134,9 @@ def analyze_order_book(order_book):
     total_ask_volume = sum([ask[1] for ask in asks])
     spread = asks[0][0] - bids[0][0]
 
-    # logger.info(f"Order Book Analysis:")
-    # logger.info(f"  - Total Bid Volume: {total_bid_volume:.2f}")
-    # logger.info(f"  - Total Ask Volume: {total_ask_volume:.2f}")
-    # logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
+    logger.info(f"Order Book Analysis:")
+    logger.info(f"  - Total Bid Volume: {total_bid_volume:.2f}")
+    logger.info(f"  - Total Ask Volume: {total_ask_volume:.2f}")
+    logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
 
     return total_bid_volume > total_ask_volume
