@@ -33,16 +33,16 @@ def define_short_term_strategy(df, mode="buy"):
         upward_reversal = latest['close'] > previous['close']
 
         # Indicators
-        rsi_oversold = latest['rsi'] < 40
+        # rsi_oversold = latest['rsi'] < 40
         macd_bullish = latest['macd'] > latest['macd_signal']
         volume_spike = latest['volume'] > df['volume'].rolling(10).mean().iloc[-1]
 
         # Log details
-        logger.info(f"BUY Conditions - Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
-        logger.info(f"BUY Indicators - RSI Oversold: {rsi_oversold}, MACD Bullish: {macd_bullish}, Volume Spike: {volume_spike}")
+        logger.info(f"BUY Conditions - || Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
+        logger.info(f"BUY Indicators - || MACD Bullish: {macd_bullish}, Volume Spike: {volume_spike}")
 
         # Combine conditions
-        return downward_trend and upward_reversal and rsi_oversold and macd_bullish and volume_spike
+        return downward_trend and upward_reversal and macd_bullish and volume_spike
 
     elif mode == "sell":
         # Detect upward trend and downward reversal
@@ -55,8 +55,8 @@ def define_short_term_strategy(df, mode="buy"):
         volume_spike = latest['volume'] > df['volume'].rolling(10).mean().iloc[-1]
 
         # Log details
-        logger.info(f"SELL Conditions - Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
-        logger.info(f"SELL Indicators - RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, Volume Spike: {volume_spike}")
+        # logger.info(f"SELL Conditions - Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
+        # logger.info(f"SELL Indicators - RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, Volume Spike: {volume_spike}")
 
         # Combine conditions
         return upward_trend and downward_reversal and rsi_overbought and macd_bearish and volume_spike
@@ -65,7 +65,7 @@ def define_short_term_strategy(df, mode="buy"):
         raise ValueError("Invalid mode. Use 'buy' or 'sell'.")
 
 
-def evaluate_short_term_signals(data, order_book):
+def simplified_evaluate_trading_signals(data, order_book):
     """
     Evaluate trading signals for 15-minute timeframe.
 
