@@ -16,7 +16,7 @@ This project implements an advanced trading bot using Python. The bot connects t
 
 <div align="center">
   <p> 
-    <a href="https://tmate.io/t/ro-CXJMRjJLtfrBe7Ep7aX8msXFw" target="_blank" 
+    <a href="https://tmate.io/t/ro-6U2QgyBF2CvDp3cpNjJww2wuu" target="_blank" 
     style="text-decoration:none;">
       <strong style="font-size:1.5em;">Click Here to Join "AutoBC" Bot Live Terminal Session</strong>
     </a>
