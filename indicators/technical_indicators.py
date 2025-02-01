@@ -1,6 +1,9 @@
 import talib
 
 def calculate_indicators(df):
+
+    df = df.copy()
+    
     df['macd'], df['macd_signal'], df['macd_hist'] = talib.MACD(df['close'])
     df['adx'] = talib.ADX(df['high'], df['low'], df['close'])
     df['+DI'] = talib.PLUS_DI(df['high'], df['low'], df['close'])
@@ -16,4 +19,8 @@ def calculate_indicators(df):
      # Add shifted conditions at the dataframe level
     df['atr_shift'] = df['atr'].shift(1)
     df['obv_shift'] = df['obv'].shift(1)
+
+    # Add 200-period moving average
+    df['ma_200'] = df['close'].rolling(window=200).mean()
+
     return df

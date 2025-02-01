@@ -43,7 +43,19 @@ def preprocess_data(df):
     df = df.ffill().bfill()
     return df
 
-async def fetch_historical_prices(pair, timeframes=settings.TIMEFRAMES, limit=1000):
+async def fetch_historical_prices(pair, timeframes=settings.TIMEFRAMES, limit=1000, save_to_csv=True):
+    """
+    Fetch historical OHLCV data for a trading pair and save it to a CSV file.
+
+    Parameters:
+        pair (str): Trading pair (e.g., 'BTC/USDT').
+        timeframes (list): List of timeframes to fetch data for.
+        limit (int): Number of data points to fetch per timeframe.
+        save_to_csv (bool): Whether to save the data to a CSV file.
+
+    Returns:
+        dict: A dictionary where keys are timeframes and values are DataFrames.
+    """
     data = {}
     try:
         for timeframe in timeframes:
@@ -56,6 +68,11 @@ async def fetch_historical_prices(pair, timeframes=settings.TIMEFRAMES, limit=10
             df.set_index('timestamp', inplace=True)
             df = preprocess_data(df)
             df = calculate_indicators(df)
+            # Save data to CSV if enabled
+            if save_to_csv:
+                filename = f"{pair.replace('/', '_')}_{timeframe}_historical_data.csv"
+                df.to_csv(filename)
+                logger.info(f"Saved historical data for {pair} ({timeframe}) to {filename}")
             data[timeframe] = df
         return data
     except Exception as e:
@@ -206,6 +223,8 @@ async def advanced_trade():
 
                     if buy_order:
                         buy_price = historical_prices['1m']['close'].iloc[-1]
+                        higest_price = buy_price
+                        base_stop_loss = buy_price * (1 - stop_loss_buffer)
                         logger.info(f"Bought {pair} at {buy_price}")
 
                         # Dynamic profit-taking loop
@@ -222,19 +241,30 @@ async def advanced_trade():
                                 ticker = await rate_limited_fetch(exchange.fetch_ticker, pair)
                                 current_price = ticker['last']  # Get the latest price from the ticker data
 
+                                #Update higest price observed
+                                higest_price = max(higest_price, current_price)
+
+                                #update stop-loss as trailing value
+                                trailing_stop_loss = higest_price * (1 - stop_loss_buffer)
+                                dynamic_stop_loss = max(trailing_stop_loss, base_stop_loss)
+
                                 if score_time % 7 == 0:
                                     historical_prices = await fetch_historical_prices_for_score(pair)
-                                    if not historical_prices:
-                                        continue
-                                    profit_percentage += calculate_indicator_score(historical_prices) * profit_step
-                                    profit_percentage = min(profit_percentage, max_profit_percentage)
+                                    if historical_prices:
+                                    
+                                        profit_percentage += calculate_indicator_score(historical_prices) * profit_step
+                                        profit_percentage = min(profit_percentage, max_profit_percentage)
 
-                                    take_profit_price = buy_price * (1 + profit_percentage)
-                                    stop_loss_price = buy_price * (1 - stop_loss_buffer)
+                                take_profit_price = buy_price * (1 + profit_percentage)
+                                    # stop_loss_price = buy_price * (1 - stop_loss_buffer)
 
-                                logger.info(f"Current Price: {current_price:.2f}, Take-Profit: {take_profit_price:.2f}, Stop-Loss: {stop_loss_price:.2f}")
+                                # logger.info(f"Current Price: {current_price:.2f}, Take-Profit: {take_profit_price:.2f}, Stop-Loss: {stop_loss_price:.2f}")
+                                logger.info(
+                                    f"Price: {current_price:.2f} | "
+                                    f"Take-Profit: {take_profit_price:.2f} | "
+                                    f"Trailing Stop: {dynamic_stop_loss:.2f}"
+                                )
 
-                                score_time += 1
 
                                 # Check if price hits take-profit or stop-loss levels
                                 if current_price >= take_profit_price:
@@ -243,7 +273,7 @@ async def advanced_trade():
                                     if not selling:
                                         await convert_to_usdt(pair)
                                     break
-                                elif current_price <= stop_loss_price:
+                                elif current_price <= dynamic_stop_loss:
                                     logger.info(f"Stop-Loss triggered! Selling at {current_price}")
                                     stopping = await place_market_order(pair, 'sell', amount_to_buy)
                                     if not stopping:
@@ -252,6 +282,8 @@ async def advanced_trade():
                                 
                                 # Wait before the next iteration
                                 await asyncio.sleep(20)
+                                score_time += 1
+
                             except Exception as e:
                                 logger.error(f"Error fetching current price or processing trade logic: {e}")
                                 await asyncio.sleep(20)  # Retry after a short delay

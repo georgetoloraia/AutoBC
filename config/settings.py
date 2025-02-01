@@ -20,13 +20,19 @@ OPENAI_API_KEY = os.getenv('open_api_key')
 quote_currency = False  # If true, trade all pairs with the quote currency (e.g., USDT)
 INITIAL_INVESTMENT = 5.0  # USD
 STOP_LOSS_PERCENTAGE = 0.02  # 2%
-TAKE_PROFIT_PERCENTAGE = 0.05  # Initial take-profit percentage (5%)
+TAKE_PROFIT_PERCENTAGE = 0.015  # Initial take-profit percentage (5%)
 
 # Dynamic Profit-Taking Parameters
 PROFIT_STEP = 0.005  # 0.5% increment for positive indicator signals
 MAX_PROFIT_PERCENTAGE = 0.30  # Cap at 30% maximum profit
+RISK_PER_TRADE = 0.02
+TRAILING_STOP_PERCENTAGE = 0.02
 
 TIMEFRAMES = [
+    "15m"
+]
+
+TIMEFRAMES_s = [
     '1m',
     '5m',
     '15m'

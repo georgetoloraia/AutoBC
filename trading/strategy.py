@@ -1,25 +1,29 @@
 import logging
+import numpy as np
+import pandas as pd
 from indicators.technical_indicators import calculate_indicators
 from config.settings import (
     BUY_CONFIDENCE_THRESHOLD,
     SELL_CONFIDENCE_THRESHOLD,
+    RISK_PER_TRADE,  # Percentage of balance to risk per trade
+    TRAILING_STOP_PERCENTAGE,  # Percentage for trailing stop
 )
 
 logger = logging.getLogger(__name__)
 
 def define_short_term_strategy(df, mode="buy"):
     """
-    Define short-term trading strategy for 15-minute timeframe.
+    Define short-term trading strategy with weighted conditions and trend filter.
 
     Parameters:
         df (pd.DataFrame): DataFrame containing OHLCV data with calculated indicators.
         mode (str): "buy" or "sell" to define the respective conditions.
 
     Returns:
-        bool: True if the conditions for buy/sell are met, False otherwise.
+        float: A confidence score between 0 and 1, where 1 indicates high confidence.
     """
-    if len(df) < 4:  # Ensure enough data points
-        return False
+    if len(df) < 4:  # Ensure enough data points for trend detection
+        return 0.0
 
     # Get the last four rows
     latest = df.iloc[-1]
@@ -27,39 +31,63 @@ def define_short_term_strategy(df, mode="buy"):
     prev_2 = df.iloc[-3]
     prev_3 = df.iloc[-4]
 
+    # Trend filter (200-period moving average)
+    if 'ma_200' not in df.columns or pd.isna(df['ma_200'].iloc[-1]):
+        trend_filter = True  # Assume no trend filter if ma_200 is not available
+    else:
+        trend_filter = latest['close'] > df['ma_200'].iloc[-1]
+
     if mode == "buy":
-        # Detect downward trend and upward reversal
+        # Trend conditions
         downward_trend = prev_3['close'] > prev_2['close'] > previous['close']
         upward_reversal = latest['close'] > previous['close']
 
-        # Indicators
-        # rsi_oversold = latest['rsi'] < 40
+        # Indicator conditions
         macd_bullish = latest['macd'] > latest['macd_signal']
-        volume_spike = latest['volume'] > df['volume'].rolling(10).mean().iloc[-1]
+        rsi_oversold = latest['rsi'] < 45
+        volume_spike = latest['volume'] > df['volume'].rolling(20).mean().iloc[-1]
 
-        # Log details
-        logger.info(f"BUY Conditions - || Downward Trend: {downward_trend}, Upward Reversal: {upward_reversal}")
-        logger.info(f"BUY Indicators - || MACD Bullish: {macd_bullish}, Volume Spike: {volume_spike}")
+        # Weighted confidence score
+        confidence = (
+            0.4 * downward_trend +  # Trend is most important
+            0.3 * upward_reversal +
+            0.2 * macd_bullish +
+            0.1 * rsi_oversold +
+            0.1 * volume_spike
+        )
 
-        # Combine conditions
-        return downward_trend and upward_reversal and macd_bullish and volume_spike
+        # Apply trend filter
+        if not trend_filter:
+            confidence *= 0.5  # Reduce confidence if against the trend
+
+        logger.info(f"BUY Confidence: {confidence:.2f}")
+        return confidence
 
     elif mode == "sell":
-        # Detect upward trend and downward reversal
+        # Trend conditions
         upward_trend = prev_3['close'] < prev_2['close'] < previous['close']
         downward_reversal = latest['close'] < previous['close']
 
-        # Indicators
-        rsi_overbought = latest['rsi'] > 65
+        # Indicator conditions
         macd_bearish = latest['macd'] < latest['macd_signal']
-        volume_spike = latest['volume'] > df['volume'].rolling(10).mean().iloc[-1]
+        rsi_overbought = latest['rsi'] > 65
+        volume_spike = latest['volume'] > df['volume'].rolling(20).mean().iloc[-1]
 
-        # Log details
-        # logger.info(f"SELL Conditions - Upward Trend: {upward_trend}, Downward Reversal: {downward_reversal}")
-        # logger.info(f"SELL Indicators - RSI Overbought: {rsi_overbought}, MACD Bearish: {macd_bearish}, Volume Spike: {volume_spike}")
+        # Weighted confidence score
+        confidence = (
+            0.4 * upward_trend +  # Trend is most important
+            0.3 * downward_reversal +
+            0.2 * macd_bearish +
+            0.1 * rsi_overbought +
+            0.1 * volume_spike
+        )
 
-        # Combine conditions
-        return upward_trend and downward_reversal and rsi_overbought and macd_bearish and volume_spike
+        # Apply trend filter
+        if trend_filter:
+            confidence *= 0.5  # Reduce confidence if against the trend
+
+        logger.info(f"SELL Confidence: {confidence:.2f}")
+        return confidence
 
     else:
         raise ValueError("Invalid mode. Use 'buy' or 'sell'.")
@@ -67,7 +95,7 @@ def define_short_term_strategy(df, mode="buy"):
 
 def simplified_evaluate_trading_signals(data, order_book):
     """
-    Evaluate trading signals for 15-minute timeframe.
+    Evaluate trading signals with dynamic thresholds and risk management.
 
     Parameters:
         data (dict): Dictionary where keys are timeframes and values are DataFrames.
@@ -95,20 +123,20 @@ def simplified_evaluate_trading_signals(data, order_book):
         logger.error(f"Error calculating indicators for 15m timeframe: {e}")
         return "wait"
 
-    # Evaluate buy and sell signals
-    buy_signal = define_short_term_strategy(df_15m, mode="buy")
-    sell_signal = define_short_term_strategy(df_15m, mode="sell")
+    # Evaluate buy and sell signals with confidence scores
+    buy_confidence = define_short_term_strategy(df_15m, mode="buy")
+    sell_confidence = define_short_term_strategy(df_15m, mode="sell")
 
     # Evaluate order book signal
     order_book_signal = analyze_order_book(order_book)
 
-    # Determine final action
-    if buy_signal and order_book_signal:
-        logger.info("Buy signal triggered for 15m strategy.")
+    # Determine final action based on confidence and thresholds
+    if buy_confidence >= BUY_CONFIDENCE_THRESHOLD and order_book_signal:
+        logger.info(f"Buy signal triggered with confidence: {buy_confidence:.2f}")
         return "buy"
-    elif sell_signal:
-        logger.info("Sell signal triggered for 15m strategy.")
-        return "sell"
+    # elif sell_confidence >= SELL_CONFIDENCE_THRESHOLD:
+    #     logger.info(f"Sell signal triggered with confidence: {sell_confidence:.2f}")
+    #     return "sell"
     else:
         logger.info("No clear signal. Returning 'wait'.")
         return "wait"
@@ -116,51 +144,31 @@ def simplified_evaluate_trading_signals(data, order_book):
 
 def analyze_order_book(order_book):
     """
-    Analyze order book data to evaluate buying or selling pressure.
+    Analyze order book data with depth consideration.
 
     Parameters:
         order_book (dict): Order book data with 'bids' and 'asks'.
 
     Returns:
-        bool: True if strong buying pressure, False otherwise.
+        float: A score between 0 and 1 indicating buying pressure.
     """
     bids = order_book.get('bids', [])
     asks = order_book.get('asks', [])
 
     if not bids or not asks:
-        return False
+        return 0.0
 
+    # Calculate total bid and ask volume
     total_bid_volume = sum([bid[1] for bid in bids])
     total_ask_volume = sum([ask[1] for ask in asks])
+
+    # Calculate depth-weighted score
+    bid_ask_ratio = total_bid_volume / (total_bid_volume + total_ask_volume)
     spread = asks[0][0] - bids[0][0]
+    spread_score = 1.0 if spread < 0.001 else 0.5  # Adjust based on market
 
-    logger.info(f"Order Book Analysis:")
-    logger.info(f"  - Total Bid Volume: {total_bid_volume:.2f}")
-    logger.info(f"  - Total Ask Volume: {total_ask_volume:.2f}")
-    logger.info(f"  - Bid-Ask Spread: {spread:.6f}")
+    # Combine scores
+    score = 0.7 * bid_ask_ratio + 0.3 * spread_score
 
-    return total_bid_volume > total_ask_volume
-
-
-
-'''
-DESIRED_COINS = [
-    "BTC/USDT",  # Bitcoin - High volume, often volatile enough for short-term trading
-    "ETH/USDT",  # Ethereum - High volume, moderate volatility
-    "SOL/USDT",  # Solana - Volatile, often large intraday movements
-    "ADA/USDT",  # Cardano - Popular and moderately volatile
-    "BNB/USDT",  # Binance Coin - High volume, decent volatility
-    "XRP/USDT",  # Ripple - Consistent volume and price action
-    "DOGE/USDT",  # Dogecoin - Volatile, good for intraday strategies
-    "MATIC/USDT",  # Polygon - High liquidity, reasonable price swings
-    "LTC/USDT",  # Litecoin - Stable but shows good short-term trends
-    "SHIB/USDT",  # Shiba Inu - Highly volatile, good for scalping
-    "DOT/USDT",  # Polkadot - Decent liquidity and intraday moves
-    "AVAX/USDT",  # Avalanche - Volatility and decent volume
-    "APT/USDT",  # Aptos - Newer, higher volatility
-    "LINK/USDT",  # Chainlink - Moderate liquidity, but trends well
-    "ATOM/USDT",  # Cosmos - Good for consistent price trends
-]
-
-
-'''
+    logger.info(f"Order Book Score: {score:.2f}")
+    return score
