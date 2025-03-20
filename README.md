@@ -135,7 +135,7 @@ The bot uses the following technical indicators:
 - **Contributions are welcome!**
 - **Please fork the repository and submit a pull request with your changes.**
 
-For Discord Server click this invitation [https://discord.gg/F6DuQYXA]
+For Discord Server click this invitation [https://discord.gg/rH57ZRPV]
 
 ```env
 ## Contact
